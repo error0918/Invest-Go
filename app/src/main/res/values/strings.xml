@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Invest Go</string>
+    <string name="app_explanation">Android Jetpack Compose와 MVVM를 활용한 투자게임</string>
 </resources>
