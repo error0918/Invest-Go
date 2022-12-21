@@ -90,20 +90,20 @@ fun WelcomeScreen(
                 .constrainAs(title) {
                     centerVerticallyTo(parent)
                     start.linkTo(parent.start, margin = 32.dp)
-                    width = Dimension.percent(0.5f)
+                    width = Dimension.percent(0.4f)
                 }
         )
 
         Text(
             text = stringResource(id = R.string.app_explanation),
-            fontSize = with (LocalDensity.current) { 20.dp.toSp() },
+            fontSize = with (LocalDensity.current) { 16.dp.toSp() },
             fontWeight = FontWeight.Light,
             color = contentColor,
             modifier = Modifier
                 .constrainAs(subTitle) {
                     top.linkTo(title.bottom)
                     start.linkTo(parent.start, margin = 32.dp)
-                    width = Dimension.percent(0.5f)
+                    width = Dimension.percent(0.4f)
                 }
         )
 
@@ -113,7 +113,7 @@ fun WelcomeScreen(
                     centerVerticallyTo(parent)
                     end.linkTo(parent.end, margin = 32.dp)
                     height = Dimension.percent(0.5f)
-                    width = Dimension.percent(0.5f)
+                    width = Dimension.percent(0.4f)
                 },
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
