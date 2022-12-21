@@ -8,7 +8,8 @@ import com.taeyeon.investgo.model.MainViewModel
 
 @Composable
 fun GameScreen(
-    mainViewModel: MainViewModel = MainViewModel(LocalContext.current)
+    mainViewModel: MainViewModel = MainViewModel(LocalContext.current),
+    name: String
 ) {
     Box(
         modifier = Modifier

@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.taeyeon.investgo.data.Screen
 import com.taeyeon.investgo.model.MainViewModel
 import com.taeyeon.investgo.theme.InvestGoTheme
@@ -40,8 +42,18 @@ class MainActivity : ComponentActivity() {
                         composable(route = Screen.Welcome.name) {
                             WelcomeScreen(mainViewModel = mainViewModel)
                         }
-                        composable(route = "${Screen.Game.name}/{name}") {
-                            GameScreen(mainViewModel = mainViewModel)
+                        composable(
+                            route = "${Screen.Game.name}/{name}",
+                            arguments = listOf(
+                                navArgument("name") {
+                                    type = NavType.StringType
+                                }
+                            )
+                        ) {
+                            GameScreen(
+                                mainViewModel = mainViewModel,
+                                name = it.arguments?.getString("name") ?: "user"
+                            )
                         }
                     }
                 }

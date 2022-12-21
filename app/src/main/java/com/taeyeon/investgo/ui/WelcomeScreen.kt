@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.taeyeon.investgo.ui
 
 import androidx.compose.animation.core.*
@@ -5,6 +7,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.*
@@ -114,9 +117,38 @@ fun WelcomeScreen(
                 },
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
+            OutlinedTextField(
+                value = "asd",
+                onValueChange = { },
+                shape = MaterialTheme.shapes.medium,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = contentColor,
+                    cursorColor = contentColor,
+                    selectionColors = TextSelectionColors(contentColor, contentColor),
+                    focusedBorderColor = contentColor,
+                    unfocusedBorderColor = contentColor,
+                    focusedLeadingIconColor = contentColor,
+                    unfocusedLeadingIconColor = contentColor,
+                    focusedTrailingIconColor = contentColor,
+                    unfocusedTrailingIconColor = contentColor,
+                    focusedLabelColor = contentColor,
+                    unfocusedLabelColor = contentColor,
+                    placeholderColor = contentColor,
+                    focusedSupportingTextColor = contentColor,
+                    unfocusedSupportingTextColor = contentColor
+                ),
+                textStyle = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = with(LocalDensity.current) { 40.dp.toSp() },
+                    fontWeight = FontWeight.Bold
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            )
+
             val navHostController = mainViewModel.navHostController
             listOf(
-                stringResource(id = R.string.welcome_play) to { navHostController.navigate("${Screen.Game.name}/NAMe") },
+                stringResource(id = R.string.welcome_play) to { navHostController.navigate("${Screen.Game.name}/NAME") },
                 stringResource(id = R.string.welcome_more) to { /* TODO */ }
             ).forEach {
                 Button(
