@@ -1,4 +1,4 @@
-package com.taeyeon.investgo.ui.theme
+package com.taeyeon.investgo.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
