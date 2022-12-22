@@ -1,4 +1,6 @@
 package com.taeyeon.investgo.model
 
-class GameViewModel {
+import androidx.lifecycle.ViewModel
+
+class GameViewModel : ViewModel() {
 }

@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.taeyeon.investgo.ui
 
 import androidx.compose.animation.core.*
@@ -9,7 +7,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Refresh
@@ -85,6 +82,8 @@ fun WelcomeScreen(
                         MaterialTheme.colorScheme.onTertiary
                     )
             )
+        val errorColor = MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
+            .compositeOver(contentColor)
 
         Text(
             text = stringResource(id = R.string.app_name),
@@ -142,8 +141,11 @@ fun WelcomeScreen(
                 var iconSize by remember { mutableStateOf(IntSize.Zero) }
 
                 BasicTextField(
-                    value = "userName 000000000000000",
-                    onValueChange = {},
+                    value = mainViewModel.welcomeViewModel.userName,
+                    onValueChange = {
+                        mainViewModel.welcomeViewModel.userName = it
+                        // TODO: Check Error
+                    },
                     textStyle = MaterialTheme.typography.titleLarge.copy(
                         fontFamily = gmarketSans,
                         fontSize = with(LocalDensity.current) { 40.dp.toSp() },
@@ -158,7 +160,7 @@ fun WelcomeScreen(
                 )
 
                 IconButton(
-                    onClick = { /*TODO*/ },
+                    onClick = { /*TODO: Random Name*/ },
                     modifier = Modifier
                         .width(LocalDensity.current.run { iconSize.height.toDp() })
                         .fillMaxHeight()
@@ -167,7 +169,7 @@ fun WelcomeScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Refresh,
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.welcome_name_random),
                         tint = contentColor,
                         modifier = Modifier
                             .fillMaxSize()
@@ -175,40 +177,59 @@ fun WelcomeScreen(
                     )
                 }
 
-                Text(
-                    text = "fsdfljsdf;kjfsklj;alkjdfl;k",
-                    color = MaterialTheme.colorScheme.error.copy(alpha = 0.6f).compositeOver(contentColor),
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                )
+                mainViewModel.welcomeViewModel.userNameErrorMessage?.let {
+                    Text(
+                        text = it,
+                        color = errorColor,
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                    )
+                }
 
             }
 
-            listOf(
-                stringResource(id = R.string.welcome_play) to { mainViewModel.navHostController.navigate("${Screen.Game.name}/NAME") },
-                stringResource(id = R.string.welcome_more) to { /* TODO */ }
-            ).forEach {
-                Button(
-                    onClick = it.second,
-                    shape = MaterialTheme.shapes.medium,
-                    border = BorderStroke(
-                        width = 4.dp,
-                        color = contentColor
-                    ),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.DarkGray.copy(alpha = 0.6f).compositeOver(MaterialTheme.colorScheme.primary),
-                        contentColor = contentColor,
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                ) {
-                    Text(
-                        text = it.first,
-                        fontSize = with(LocalDensity.current) { 40.dp.toSp() },
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+            Button(
+                onClick = { mainViewModel.navHostController.navigate("${Screen.Game.name}/NAME") },
+                shape = MaterialTheme.shapes.medium,
+                border = BorderStroke(
+                    width = 4.dp,
+                    color = contentColor
+                ),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.DarkGray.copy(alpha = 0.6f).compositeOver(MaterialTheme.colorScheme.primary),
+                    contentColor = contentColor,
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                Text(
+                    text = stringResource(id = R.string.welcome_play),
+                    fontSize = with(LocalDensity.current) { 40.dp.toSp() },
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Button(
+                onClick = { /*TODO*/ },
+                shape = MaterialTheme.shapes.medium,
+                border = BorderStroke(
+                    width = 4.dp,
+                    color = contentColor
+                ),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.DarkGray.copy(alpha = 0.6f).compositeOver(MaterialTheme.colorScheme.primary),
+                    contentColor = contentColor,
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                Text(
+                    text = stringResource(id = R.string.welcome_more),
+                    fontSize = with(LocalDensity.current) { 40.dp.toSp() },
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
 
