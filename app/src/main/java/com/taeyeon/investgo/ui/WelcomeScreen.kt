@@ -5,11 +5,14 @@ package com.taeyeon.investgo.ui
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
@@ -30,6 +34,7 @@ import androidx.constraintlayout.compose.Dimension
 import com.taeyeon.investgo.R
 import com.taeyeon.investgo.data.Screen
 import com.taeyeon.investgo.model.MainViewModel
+import com.taeyeon.investgo.theme.gmarketSans
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.system.exitProcess
@@ -83,8 +88,9 @@ fun WelcomeScreen(
 
         Text(
             text = stringResource(id = R.string.app_name),
+            style = MaterialTheme.typography.titleLarge,
             fontSize = with (LocalDensity.current) { 80.dp.toSp() },
-            fontWeight = FontWeight.ExtraBold,
+            fontWeight = FontWeight.Bold,
             color = contentColor,
             modifier = Modifier
                 .constrainAs(title) {
@@ -96,6 +102,7 @@ fun WelcomeScreen(
 
         Text(
             text = stringResource(id = R.string.app_explanation),
+            style = MaterialTheme.typography.titleLarge,
             fontSize = with (LocalDensity.current) { 16.dp.toSp() },
             fontWeight = FontWeight.Light,
             color = contentColor,
@@ -117,38 +124,68 @@ fun WelcomeScreen(
                 },
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
-            OutlinedTextField(
-                value = "asd",
-                onValueChange = { },
-                shape = MaterialTheme.shapes.medium,
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    textColor = contentColor,
-                    cursorColor = contentColor,
-                    selectionColors = TextSelectionColors(contentColor, contentColor),
-                    focusedBorderColor = contentColor,
-                    unfocusedBorderColor = contentColor,
-                    focusedLeadingIconColor = contentColor,
-                    unfocusedLeadingIconColor = contentColor,
-                    focusedTrailingIconColor = contentColor,
-                    unfocusedTrailingIconColor = contentColor,
-                    focusedLabelColor = contentColor,
-                    unfocusedLabelColor = contentColor,
-                    placeholderColor = contentColor,
-                    focusedSupportingTextColor = contentColor,
-                    unfocusedSupportingTextColor = contentColor
-                ),
-                textStyle = MaterialTheme.typography.titleLarge.copy(
-                    fontSize = with(LocalDensity.current) { 40.dp.toSp() },
-                    fontWeight = FontWeight.Bold
-                ),
+
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-            )
+                    .border(
+                        width = 4.dp,
+                        color = contentColor,
+                        shape = MaterialTheme.shapes.medium
+                    )
+                    .padding(
+                        vertical = 16.dp,
+                        horizontal = 32.dp
+                    )
+            ) {
+                var iconSize by remember { mutableStateOf(IntSize.Zero) }
 
-            val navHostController = mainViewModel.navHostController
+                BasicTextField(
+                    value = "userName 000000000000000",
+                    onValueChange = {},
+                    textStyle = MaterialTheme.typography.titleLarge.copy(
+                        fontFamily = gmarketSans,
+                        fontSize = with(LocalDensity.current) { 40.dp.toSp() },
+                        fontWeight = FontWeight.Bold,
+                        color = contentColor
+                    ),
+                    cursorBrush = SolidColor(contentColor),
+                    singleLine = true,
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(end = LocalDensity.current.run { iconSize.width.toDp() })
+                )
+
+                IconButton(
+                    onClick = { /*TODO*/ },
+                    modifier = Modifier
+                        .width(LocalDensity.current.run { iconSize.height.toDp() })
+                        .fillMaxHeight()
+                        .align(Alignment.CenterEnd)
+                        .onSizeChanged { iconSize = it }
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Refresh,
+                        contentDescription = null,
+                        tint = contentColor,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    )
+                }
+
+                Text(
+                    text = "fsdfljsdf;kjfsklj;alkjdfl;k",
+                    color = MaterialTheme.colorScheme.error.copy(alpha = 0.6f).compositeOver(contentColor),
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                )
+
+            }
+
             listOf(
-                stringResource(id = R.string.welcome_play) to { navHostController.navigate("${Screen.Game.name}/NAME") },
+                stringResource(id = R.string.welcome_play) to { mainViewModel.navHostController.navigate("${Screen.Game.name}/NAME") },
                 stringResource(id = R.string.welcome_more) to { /* TODO */ }
             ).forEach {
                 Button(
