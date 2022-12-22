@@ -1,8 +1,7 @@
 package com.taeyeon.investgo.ui
 
-import androidx.compose.animation.core.*
+import android.content.Context
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -14,8 +13,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.compositeOver
@@ -32,8 +29,7 @@ import com.taeyeon.investgo.R
 import com.taeyeon.investgo.data.Screen
 import com.taeyeon.investgo.model.MainViewModel
 import com.taeyeon.investgo.theme.gmarketSans
-import kotlin.math.cos
-import kotlin.math.sin
+import com.taeyeon.investgo.util.spinningGradientBackground
 import kotlin.random.Random
 import kotlin.system.exitProcess
 
@@ -41,9 +37,10 @@ import kotlin.system.exitProcess
 fun WelcomeScreen(
     mainViewModel: MainViewModel = MainViewModel(LocalContext.current)
 ) {
+    val context = LocalContext.current
     LaunchedEffect(true) {
         mainViewModel.welcomeViewModel.userName = getRandomName()
-        mainViewModel.welcomeViewModel.userNameErrorMessage= checkUserNameError(mainViewModel.welcomeViewModel.userName)
+        mainViewModel.welcomeViewModel.userNameErrorMessage = checkUserNameError(context, mainViewModel.welcomeViewModel.userName)
     }
 
     val contentColor = MaterialTheme.colorScheme.onPrimary
@@ -56,36 +53,14 @@ fun WelcomeScreen(
     val errorColor = MaterialTheme.colorScheme.error.copy(alpha = 0.5f)
         .compositeOver(contentColor)
 
-    var size by remember { mutableStateOf(IntSize.Zero) }
-    val biggerSection = if (size.width > size.height) size.width else size.height
-    val angle by rememberInfiniteTransition().animateFloat(
-        initialValue = 0f,
-        targetValue = Math.toRadians(360.0).toFloat(),
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 100000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        )
-    )
-
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .onSizeChanged { size = it }
-            .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.secondary,
-                        MaterialTheme.colorScheme.tertiary
-                    ),
-                    start = Offset(
-                        x = size.width / 2 + biggerSection * sin(angle) / 2,
-                        y = size.height / 2 + biggerSection * cos(angle) / 2
-                    ),
-                    end = Offset(
-                        x = size.width / 2 - biggerSection * sin(angle) / 2,
-                        y = size.height / 2 - biggerSection * cos(angle) / 2
-                    )
+            .spinningGradientBackground(
+                colors = listOf(
+                    MaterialTheme.colorScheme.primary,
+                    MaterialTheme.colorScheme.secondary,
+                    MaterialTheme.colorScheme.tertiary
                 )
             )
             .padding(32.dp)
@@ -153,8 +128,7 @@ fun WelcomeScreen(
                     value = mainViewModel.welcomeViewModel.userName,
                     onValueChange = {
                         mainViewModel.welcomeViewModel.userName = it
-                        mainViewModel.welcomeViewModel.userNameErrorMessage= checkUserNameError(mainViewModel.welcomeViewModel.userName)
-                        mainViewModel.welcomeViewModel.userNameErrorMessage = "asd"
+                        mainViewModel.welcomeViewModel.userNameErrorMessage = checkUserNameError(context, mainViewModel.welcomeViewModel.userName)
                     },
                     textStyle = MaterialTheme.typography.titleLarge.copy(
                         fontFamily = gmarketSans,
@@ -172,7 +146,7 @@ fun WelcomeScreen(
                 IconButton(
                     onClick = {
                         mainViewModel.welcomeViewModel.userName = getRandomName()
-                        mainViewModel.welcomeViewModel.userNameErrorMessage= checkUserNameError(mainViewModel.welcomeViewModel.userName)
+                        mainViewModel.welcomeViewModel.userNameErrorMessage = checkUserNameError(context, mainViewModel.welcomeViewModel.userName)
                     },
                     modifier = Modifier
                         .width(LocalDensity.current.run { iconSize.height.toDp() })
@@ -192,6 +166,7 @@ fun WelcomeScreen(
 
                 Text(
                     text = stringResource(id = R.string.welcome_nickname),
+                    style = MaterialTheme.typography.labelSmall,
                     color =
                     if (mainViewModel.welcomeViewModel.userNameErrorMessage == null) contentColor
                     else errorColor,
@@ -202,6 +177,7 @@ fun WelcomeScreen(
                 mainViewModel.welcomeViewModel.userNameErrorMessage?.let {
                     Text(
                         text = it,
+                        style = MaterialTheme.typography.labelSmall,
                         color = errorColor,
                         modifier = Modifier
                             .align(Alignment.BottomStart)
@@ -211,7 +187,7 @@ fun WelcomeScreen(
             }
 
             Button(
-                onClick = { mainViewModel.navHostController.navigate("${Screen.Game.name}/NAME") },
+                onClick = { mainViewModel.navHostController.navigate(Screen.ReadyForGame.name) },
                 shape = MaterialTheme.shapes.medium,
                 border = BorderStroke(
                     width = 4.dp,
@@ -305,6 +281,10 @@ fun getRandomName(): String {
     return "${animalList.random()} ${getDigitNumber(Random.nextInt(0, 1000), 3)}"
 }
 
-fun checkUserNameError(userName: String): String? {
-    return null
+fun checkUserNameError(context: Context, userName: String): String? {
+    return when {
+        userName.isBlank() -> context.getString(R.string.welcome_user_name_error_blank)
+        userName.length > 15 -> context.getString(R.string.welcome_user_name_error_too_long)
+        else -> null
+    }
 }

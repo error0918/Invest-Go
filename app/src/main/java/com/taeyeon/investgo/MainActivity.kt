@@ -1,25 +1,31 @@
+@file:OptIn(ExperimentalAnimationApi::class)
+@file:Suppress("OPT_IN_IS_NOT_ENABLED")
+
 package com.taeyeon.investgo
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
 import com.taeyeon.investgo.data.Screen
 import com.taeyeon.investgo.model.MainViewModel
 import com.taeyeon.investgo.theme.InvestGoTheme
 import com.taeyeon.investgo.ui.GameScreen
+import com.taeyeon.investgo.ui.ReadyForGameScreen
 import com.taeyeon.investgo.ui.WelcomeScreen
 
 class MainActivity : ComponentActivity() {
@@ -35,24 +41,100 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val mainViewModel = MainViewModel(this)
-                    NavHost(
+                    AnimatedNavHost(
                         navController = mainViewModel.navHostController,
                         startDestination = Screen.Welcome.name
                     ) {
-                        composable(route = Screen.Welcome.name) {
+                        composable(
+                            route = Screen.Welcome.name,
+                            enterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentScope.SlideDirection.Left,
+                                    animationSpec = tween(durationMillis = 1000)
+                                )
+                            },
+                            exitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentScope.SlideDirection.Left,
+                                    animationSpec = tween(durationMillis = 1000)
+                                )
+                            },
+                            popEnterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentScope.SlideDirection.Left,
+                                    animationSpec = tween(durationMillis = 1000)
+                                )
+                            },
+                            popExitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentScope.SlideDirection.Left,
+                                    animationSpec = tween(durationMillis = 1000)
+                                )
+                            }
+                        ) {
+                            Log.e("asdf", "a")
                             WelcomeScreen(mainViewModel = mainViewModel)
                         }
                         composable(
-                            route = "${Screen.Game.name}/{name}",
-                            arguments = listOf(
-                                navArgument("name") {
-                                    type = NavType.StringType
-                                }
+                            route = Screen.ReadyForGame.name,
+                            enterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentScope.SlideDirection.Left,
+                                    animationSpec = tween(durationMillis = 1000)
+                                )
+                            },
+                            exitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentScope.SlideDirection.Left,
+                                    animationSpec = tween(durationMillis = 1000)
+                                )
+                            },
+                            popEnterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentScope.SlideDirection.Left,
+                                    animationSpec = tween(durationMillis = 1000)
+                                )
+                            },
+                            popExitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentScope.SlideDirection.Left,
+                                    animationSpec = tween(durationMillis = 1000)
+                                )
+                            },
+                        ) {
+                            ReadyForGameScreen(
+                                mainViewModel = mainViewModel
                             )
+                        }
+                        composable(
+                            route = Screen.Game.name,
+                            enterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentScope.SlideDirection.Left,
+                                    animationSpec = tween(durationMillis = 1000)
+                                )
+                            },
+                            exitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentScope.SlideDirection.Left,
+                                    animationSpec = tween(durationMillis = 1000)
+                                )
+                            },
+                            popEnterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentScope.SlideDirection.Left,
+                                    animationSpec = tween(durationMillis = 1000)
+                                )
+                            },
+                            popExitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentScope.SlideDirection.Left,
+                                    animationSpec = tween(durationMillis = 1000)
+                                )
+                            },
                         ) {
                             GameScreen(
-                                mainViewModel = mainViewModel,
-                                name = it.arguments?.getString("name") ?: "user"
+                                mainViewModel = mainViewModel
                             )
                         }
                     }

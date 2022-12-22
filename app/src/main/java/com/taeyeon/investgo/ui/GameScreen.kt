@@ -10,10 +10,9 @@ import com.taeyeon.investgo.model.MainViewModel
 
 @Composable
 fun GameScreen(
-    mainViewModel: MainViewModel = MainViewModel(LocalContext.current),
-    name: String = "user"
+    mainViewModel: MainViewModel = MainViewModel(LocalContext.current)
 ) {
-    LaunchedEffect(name) {
+    LaunchedEffect(mainViewModel.welcomeViewModel.userName) {
         mainViewModel.gameViewModel = GameViewModel()
     }
 
