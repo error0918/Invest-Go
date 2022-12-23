@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.taeyeon.investgo.data.Settings
 
 class ReadyForGameViewModel : ViewModel() {
     val timeList = listOf(
@@ -11,5 +12,5 @@ class ReadyForGameViewModel : ViewModel() {
         60 * 5 to "05:00",
         60 * 7 to "07:00"
     )
-    var selected by mutableStateOf(1)
+    var selected by mutableStateOf(Settings.DEFAULT_TIME_SELECTED)
 }

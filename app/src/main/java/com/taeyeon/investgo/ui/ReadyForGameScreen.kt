@@ -7,7 +7,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowLeft
 import androidx.compose.material.icons.rounded.ArrowRight
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +27,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.taeyeon.investgo.R
 import com.taeyeon.investgo.data.Screen
+import com.taeyeon.investgo.data.Settings
 import com.taeyeon.investgo.model.MainViewModel
 import com.taeyeon.investgo.util.spinningGradientBackground
 
@@ -137,9 +137,9 @@ fun ReadyForGameScreen(
         }
 
         Text(
-            text = stringResource(id = R.string.ready_for_game_explanation),
+            text = stringResource(id = R.string.ready_for_game_explanation, Settings.DEFAULT_MONEY),
             style = MaterialTheme.typography.titleLarge,
-            fontSize = with (LocalDensity.current) { 30.dp.toSp() },
+            fontSize = with (LocalDensity.current) { 28.dp.toSp() },
             fontWeight = FontWeight.Normal,
             textAlign = TextAlign.End,
             color = contentColor,
@@ -173,7 +173,10 @@ fun ReadyForGameScreen(
                         imageVector = Icons.Rounded.ArrowLeft,
                         contentDescription = stringResource(id = R.string.ready_for_game_previous)
                     )
-                    Text(text = stringResource(id = R.string.ready_for_game_previous))
+                    Text(
+                        text = stringResource(id = R.string.ready_for_game_previous),
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
                 }
             }
         }
@@ -196,11 +199,14 @@ fun ReadyForGameScreen(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Text(
+                        text = stringResource(id = R.string.ready_for_game_play),
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
                     Icon(
                         imageVector = Icons.Rounded.ArrowRight,
                         contentDescription = stringResource(id = R.string.ready_for_game_play)
                     )
-                    Text(text = stringResource(id = R.string.ready_for_game_play))
                 }
             }
         }

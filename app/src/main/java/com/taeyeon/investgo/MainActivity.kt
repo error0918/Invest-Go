@@ -5,7 +5,6 @@ package com.taeyeon.investgo
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -49,55 +48,54 @@ class MainActivity : ComponentActivity() {
                             route = Screen.Welcome.name,
                             enterTransition = {
                                 slideIntoContainer(
-                                    AnimatedContentScope.SlideDirection.Left,
+                                    AnimatedContentScope.SlideDirection.Up,
                                     animationSpec = tween(durationMillis = 1000)
                                 )
                             },
                             exitTransition = {
                                 slideOutOfContainer(
-                                    AnimatedContentScope.SlideDirection.Left,
+                                    AnimatedContentScope.SlideDirection.Up,
                                     animationSpec = tween(durationMillis = 1000)
                                 )
                             },
                             popEnterTransition = {
                                 slideIntoContainer(
-                                    AnimatedContentScope.SlideDirection.Left,
+                                    AnimatedContentScope.SlideDirection.Up,
                                     animationSpec = tween(durationMillis = 1000)
                                 )
                             },
                             popExitTransition = {
                                 slideOutOfContainer(
-                                    AnimatedContentScope.SlideDirection.Left,
+                                    AnimatedContentScope.SlideDirection.Up,
                                     animationSpec = tween(durationMillis = 1000)
                                 )
                             }
                         ) {
-                            Log.e("asdf", "a")
                             WelcomeScreen(mainViewModel = mainViewModel)
                         }
                         composable(
                             route = Screen.ReadyForGame.name,
                             enterTransition = {
                                 slideIntoContainer(
-                                    AnimatedContentScope.SlideDirection.Left,
+                                    AnimatedContentScope.SlideDirection.Up,
                                     animationSpec = tween(durationMillis = 1000)
                                 )
                             },
                             exitTransition = {
                                 slideOutOfContainer(
-                                    AnimatedContentScope.SlideDirection.Left,
+                                    AnimatedContentScope.SlideDirection.Up,
                                     animationSpec = tween(durationMillis = 1000)
                                 )
                             },
                             popEnterTransition = {
                                 slideIntoContainer(
-                                    AnimatedContentScope.SlideDirection.Left,
+                                    AnimatedContentScope.SlideDirection.Up,
                                     animationSpec = tween(durationMillis = 1000)
                                 )
                             },
                             popExitTransition = {
                                 slideOutOfContainer(
-                                    AnimatedContentScope.SlideDirection.Left,
+                                    AnimatedContentScope.SlideDirection.Up,
                                     animationSpec = tween(durationMillis = 1000)
                                 )
                             },
@@ -110,25 +108,25 @@ class MainActivity : ComponentActivity() {
                             route = Screen.Game.name,
                             enterTransition = {
                                 slideIntoContainer(
-                                    AnimatedContentScope.SlideDirection.Left,
+                                    AnimatedContentScope.SlideDirection.Up,
                                     animationSpec = tween(durationMillis = 1000)
                                 )
                             },
                             exitTransition = {
                                 slideOutOfContainer(
-                                    AnimatedContentScope.SlideDirection.Left,
+                                    AnimatedContentScope.SlideDirection.Up,
                                     animationSpec = tween(durationMillis = 1000)
                                 )
                             },
                             popEnterTransition = {
                                 slideIntoContainer(
-                                    AnimatedContentScope.SlideDirection.Left,
+                                    AnimatedContentScope.SlideDirection.Up,
                                     animationSpec = tween(durationMillis = 1000)
                                 )
                             },
                             popExitTransition = {
                                 slideOutOfContainer(
-                                    AnimatedContentScope.SlideDirection.Left,
+                                    AnimatedContentScope.SlideDirection.Up,
                                     animationSpec = tween(durationMillis = 1000)
                                 )
                             },
