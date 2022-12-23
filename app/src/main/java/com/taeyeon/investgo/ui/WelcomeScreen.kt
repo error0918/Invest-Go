@@ -246,7 +246,7 @@ fun WelcomeScreen(
                     end.linkTo(parent.end)
                     bottom.linkTo(parent.bottom)
                 }
-        )
+        ) // TODO
 
         OutlinedButton(
             onClick = { exitProcess(0) },

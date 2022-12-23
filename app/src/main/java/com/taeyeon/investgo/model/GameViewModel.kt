@@ -14,7 +14,8 @@ import kotlinx.coroutines.launch
 
 class GameViewModel(
     name: String = getRandomName(),
-    time: Int = 60 * 5
+    time: Int = 60 * 5,
+    onEnd: () -> Unit = {  }
 ) : ViewModel() {
     private var isTimerWorking = true
     private var remainingSeconds = time
@@ -25,7 +26,7 @@ class GameViewModel(
     var score by mutableStateOf(Settings.DEFAULT_MONEY)
     var won by mutableStateOf(Settings.DEFAULT_MONEY)
 
-    var isMenuPopupShowing by mutableStateOf(false)
+    var isShowingMenu by mutableStateOf(false)
 
 
     init {
@@ -34,7 +35,10 @@ class GameViewModel(
                 delay(1000)
                 remainingSeconds--
                 remainingVisibleTime = "${getDigitNumber(remainingSeconds / 60, 2)}:${getDigitNumber(remainingSeconds % 60, 2)}"
-                if (remainingSeconds <= 0) stopTimer()
+                if (remainingSeconds <= 0) {
+                    stopTimer()
+                    onEnd()
+                }
             }
         }
     }
