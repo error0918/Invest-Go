@@ -9,4 +9,10 @@
     <string name="welcome_user_name_error_too_long">닉네임이 너무 깁니다.</string>
     <string name="welcome_play">플레이</string>
     <string name="welcome_more">더보기</string>
+
+    <string name="ready_for_game_select_time">시간 선택</string>
+    <string name="ready_for_game_selected">선택됨</string>
+    <string name="ready_for_game_explanation">거래를 통해 벌 수 있는 가장 많은 돈을 벌으세요!\n게임이 종료되면 보유한 자산은 모두 원으로 환산되어 스코어로 매겨집니다.</string>
+    <string name="ready_for_game_previous">이전</string>
+    <string name="ready_for_game_play">플레이</string>
 </resources>

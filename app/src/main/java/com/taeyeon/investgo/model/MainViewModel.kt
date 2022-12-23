@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalAnimationApi::class)
+@file:Suppress("OPT_IN_IS_NOT_ENABLED")
 
 package com.taeyeon.investgo.model
 

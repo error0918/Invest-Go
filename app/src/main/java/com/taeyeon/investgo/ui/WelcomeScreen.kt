@@ -65,7 +65,7 @@ fun WelcomeScreen(
             )
             .padding(32.dp)
     ) {
-        val (title, subTitle, controlColumn, closeButton) = createRefs()
+        val (title, subTitle, controlColumn, labelText, closeButton) = createRefs()
 
         Text(
             text = stringResource(id = R.string.app_name),
@@ -77,7 +77,7 @@ fun WelcomeScreen(
                 .constrainAs(title) {
                     centerVerticallyTo(parent)
                     start.linkTo(parent.start)
-                    width = Dimension.percent(0.4f)
+                    width = Dimension.percent(0.45f)
                 }
         )
 
@@ -91,7 +91,7 @@ fun WelcomeScreen(
                 .constrainAs(subTitle) {
                     top.linkTo(title.bottom)
                     start.linkTo(parent.start)
-                    width = Dimension.percent(0.4f)
+                    width = Dimension.percent(0.45f)
                 }
         )
 
@@ -101,7 +101,7 @@ fun WelcomeScreen(
                     centerVerticallyTo(parent)
                     end.linkTo(parent.end)
                     height = Dimension.percent(0.5f)
-                    width = Dimension.percent(0.4f)
+                    width = Dimension.percent(0.45f)
                 },
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
@@ -235,6 +235,17 @@ fun WelcomeScreen(
                 )
             }
         }
+
+        Text(
+            text = "2022 동산제 - 인공지능컴퓨터동아리 부스 (개발자: 20616 정태연)",
+            style = MaterialTheme.typography.labelLarge,
+            color = contentColor,
+            modifier = Modifier
+                .constrainAs(labelText) {
+                    end.linkTo(parent.end)
+                    bottom.linkTo(parent.bottom)
+                }
+        )
 
         OutlinedButton(
             onClick = { exitProcess(0) },
