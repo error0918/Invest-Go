@@ -58,9 +58,6 @@ fun GameScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .onSizeChanged { size = it }
-                .background(
-                    color = Color.LightGray
-                )
                 .blur(
                     animateDpAsState(
                         targetValue =

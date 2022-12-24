@@ -1,6 +1,7 @@
 package com.taeyeon.investgo.ui
 
 import android.content.Context
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -23,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.taeyeon.investgo.R
@@ -72,6 +74,14 @@ fun WelcomeScreen(
             text = stringResource(id = R.string.app_name),
             style = MaterialTheme.typography.titleLarge,
             fontSize = with (LocalDensity.current) { 80.dp.toSp() },
+            letterSpacing = rememberInfiniteTransition().animateFloat(
+                initialValue = 0f,
+                targetValue = LocalDensity.current.run { 10.dp.toPx() },
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 1000),
+                    repeatMode = RepeatMode.Reverse
+                )
+            ).value.sp,
             fontWeight = FontWeight.Bold,
             color = contentColor,
             modifier = Modifier

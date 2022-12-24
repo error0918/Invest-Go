@@ -31,14 +31,19 @@ class GameViewModel(
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
+            var count = 0
             while (isTimerWorking) {
                 if (isTimerDoing) {
-                    delay(1000)
-                    remainingSeconds--
-                    remainingVisibleTime = "${getDigitNumber(remainingSeconds / 60, 2)}:${getDigitNumber(remainingSeconds % 60, 2)}"
-                    if (remainingSeconds <= 0) {
-                        stopTimer()
-                        onEnd()
+                    delay(100)
+                    count++
+
+                    if (count % 10 == 0) {
+                        remainingSeconds--
+                        remainingVisibleTime = "${getDigitNumber(remainingSeconds / 60, 2)}:${getDigitNumber(remainingSeconds % 60, 2)}"
+                        if (remainingSeconds <= 0) {
+                            stopTimer()
+                            onEnd()
+                        }
                     }
                 }
             }
