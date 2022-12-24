@@ -19,10 +19,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Money
+import androidx.compose.material.icons.rounded.Computer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -48,6 +49,9 @@ import com.taeyeon.investgo.theme.gmarketSans
 import com.taeyeon.investgo.ui.GameScreen
 import com.taeyeon.investgo.ui.ReadyForGameScreen
 import com.taeyeon.investgo.ui.WelcomeScreen
+import kotlinx.coroutines.delay
+import kotlin.math.ceil
+import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -191,7 +195,7 @@ class MainActivity : ComponentActivity() {
 data class StockData(
     val icon: ImageVector? = null,
     val name: String,
-    val history: ArrayList<Float>
+    val history: SnapshotStateList<Float>
 )
 
 
@@ -200,35 +204,36 @@ fun Test() {
     // Parameter
     val stockData = remember {
         StockData(
-            icon = Icons.Rounded.Money,
-            name = "달러 ($/\\)",
-            history = arrayListOf(
+            icon = Icons.Rounded.Computer,
+            name = "태연전자 (\\)",
+            history = mutableStateListOf(
                 1100f, 1150f, 1200f, 1190f, 1130f, 1100f, 1070f, 1030f, 1040f, 1140f, 1100f, 1120f, 1130f
             )
         )
     }
 
+    LaunchedEffect(true) {
+        while (true) {
+            delay(100)
+            stockData.history.add(stockData.history.last() * ((Random.nextFloat() - 0.5f) * 0.05f + 1f))
+        }
+    }
+
 
     // Additional Stock Data
-    var changeAmount by remember { mutableStateOf(0f) }
-    var changeRate by remember { mutableStateOf(0f) }
-    var priceRange by remember { mutableStateOf(stockData.history[0] .. stockData.history[0]) }
-
-    // Internal Function
-    val getRate = { price: Float -> (priceRange.endInclusive - price) / (priceRange.endInclusive - priceRange.start) }
-
-    LaunchedEffect(stockData.history) {
-        changeAmount = stockData.history.last() - stockData.history[if (stockData.history.size == 0) 0 else stockData.history.size - 2]
-        stockData.history.forEach {
-            if (it < priceRange.start) priceRange = it .. priceRange.endInclusive
-            else if (it > priceRange.endInclusive) priceRange = priceRange.start .. it
-        }
-        changeRate = getRate(stockData.history.last())
+    var priceRange = stockData.history[0] .. stockData.history[0]
+    stockData.history.forEach {
+        if (it < priceRange.start) priceRange = it .. priceRange.endInclusive
+        else if (it > priceRange.endInclusive) priceRange = priceRange.start .. it
     }
+
+    val getRate = { price: Float -> (priceRange.endInclusive - price) / (priceRange.endInclusive - priceRange.start) }
+    val changeAmount = stockData.history.last() - stockData.history[if (stockData.history.size == 0) 0 else stockData.history.size - 2]
 
 
     // Composable Variable
     var interval by rememberSaveable { mutableStateOf(1f) }
+    var autoScroll by rememberSaveable { mutableStateOf(true) }
 
 
     Box(
@@ -325,13 +330,24 @@ fun Test() {
                         )
                     }
 
-                    Text(
-                        text = "04:32", // TODO
-                        fontSize = LocalDensity.current.run { 24.dp.toSp() },
-                        fontFamily = gmarketSans,
+                    Row(
                         modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                    )
+                            .height(24.dp)
+                            .align(Alignment.CenterEnd),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Switch(
+                            checked = autoScroll,
+                            onCheckedChange = { autoScroll = it },
+                            modifier = Modifier.height(24.dp)
+                        )
+                        Text(
+                            text = "자동 스크롤",
+                            fontSize = LocalDensity.current.run { 24.dp.toSp() },
+                            fontFamily = gmarketSans
+                        )
+                    }
                     
                 }
 
@@ -357,6 +373,12 @@ fun Test() {
                     val oneBlock = LocalDensity.current.run {
                         (chartSize.width.toDp() - (64.dp + 2.dp)) * 0.1f to chartSize.height.toDp() - (32.dp + 16.dp + 16.dp)
                     }
+
+                    val density = LocalDensity.current
+                    LaunchedEffect(changeAmount) {
+                        if (autoScroll) scrollState.animateScrollTo(scrollState.value + density.run { oneBlock.first.toPx() / (interval * 8.5f) }.toInt()) // So What?
+                    }
+
                     Row(
                         modifier = Modifier
                             .padding(
@@ -370,7 +392,7 @@ fun Test() {
                         val primary = MaterialTheme.colorScheme.primary
                         Canvas(
                             modifier = Modifier
-                                .width(oneBlock.first * stockData.history.size)
+                                .width(oneBlock.first * ((stockData.history.size) / (interval * 10) + (if (stockData.history.size >= interval * 100f) 1f else 0.5f)))
                                 .fillMaxHeight()
                         ) {
                             drawPath(
@@ -378,10 +400,10 @@ fun Test() {
                                     moveTo(x = 0f, y = oneBlock.second.toPx())
                                     lineTo(x = 0f, y = oneBlock.second.toPx() * getRate(stockData.history.first()))
                                     for (index in 0 until stockData.history.size) {
-                                        lineTo(x = oneBlock.first.toPx() * (index + 0.5f), y = oneBlock.second.toPx() * getRate(stockData.history[index]))
+                                        lineTo(x = oneBlock.first.toPx() * (index / (interval * 10) + 0.5f), y = oneBlock.second.toPx() * getRate(stockData.history[index]))
                                     }
-                                    lineTo(x = oneBlock.first.toPx() * stockData.history.size, y = oneBlock.second.toPx() * getRate(stockData.history.last()))
-                                    lineTo(x = oneBlock.first.toPx() * stockData.history.size, y = oneBlock.second.toPx())
+                                    lineTo(x = oneBlock.first.toPx() * ((stockData.history.size - 1) / (interval * 10) + (if (stockData.history.size >= interval * 100f) 1f else 0.5f)), y = oneBlock.second.toPx() * getRate(stockData.history.last()))
+                                    lineTo(x = oneBlock.first.toPx() * ((stockData.history.size - 1) / (interval * 10) + (if (stockData.history.size >= interval * 100f) 1f else 0.5f)), y = oneBlock.second.toPx())
                                     close()
                                 },
                                 color = primary.copy(alpha = 0.2f)
@@ -390,9 +412,9 @@ fun Test() {
                                 path = Path().apply {
                                     moveTo(x = 0f, y = oneBlock.second.toPx() * getRate(stockData.history.first()))
                                     for (index in 0 until stockData.history.size) {
-                                        lineTo(x = oneBlock.first.toPx() * (index + 0.5f), y = oneBlock.second.toPx() * getRate(stockData.history[index]))
+                                        lineTo(x = oneBlock.first.toPx() * (index / (interval * 10) + 0.5f), y = oneBlock.second.toPx() * getRate(stockData.history[index]))
                                     }
-                                    lineTo(x = oneBlock.first.toPx() * stockData.history.size, y = oneBlock.second.toPx() * getRate(stockData.history.last()))
+                                    lineTo(x = oneBlock.first.toPx() * ((stockData.history.size - 1) / (interval * 10) + (if (stockData.history.size >= interval * 100) 1f else 0.5f)), y = oneBlock.second.toPx() * getRate(stockData.history.last()))
                                 },
                                 color = primary,
                                 style = Stroke(
@@ -404,20 +426,18 @@ fun Test() {
 
                     Row(
                         modifier = Modifier
-                            .padding(end = 64.dp + 2.dp,)
+                            .padding(end = 64.dp + 2.dp)
                             .fillMaxWidth()
                             .align(Alignment.BottomCenter)
                             .horizontalScroll(state = scrollState)
                     ) {
-                        for (index in 0 until stockData.history.size) {
-                            if (index % interval.toInt() == 0) {
-                                Text(
-                                    text = index.toString(),
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                        .width(oneBlock.first)
-                                )
-                            }
+                        for (index in 0 .. (ceil(stockData.history.size / (interval * 10)).toInt()).let { if (it < 10) 10 else it }) {
+                            Text(
+                                text = (index * interval).toInt().toString(),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .width(oneBlock.first)
+                            )
                         }
                     }
 
@@ -456,8 +476,8 @@ fun Test() {
                                 if (changeAmount > 0f) Color.Red
                                 else if (changeAmount < 0f) Color.Blue
                                 else Color.Gray,
-                            start = Offset(x = 0f, y = size.height * changeRate),
-                            end = Offset(x = size.width, y = size.height * changeRate),
+                            start = Offset(x = 0f, y = size.height * getRate(stockData.history.last())),
+                            end = Offset(x = size.width, y = size.height * getRate(stockData.history.last())),
                             strokeWidth = 2.dp.toPx(),
                             cap = StrokeCap.Round,
                             alpha = 0.6f,
@@ -467,10 +487,7 @@ fun Test() {
 
                     Spacer(
                         modifier = Modifier
-                            .padding(
-                                bottom = 32.dp,
-                                end = 64.dp
-                            )
+                            .padding(end = 64.dp)
                             .width(2.dp)
                             .fillMaxHeight()
                             .align(Alignment.CenterEnd)
@@ -502,7 +519,8 @@ fun Test() {
                     ) {
                         for (index in 10 downTo 0) {
                             Text(
-                                text = (priceRange.start + index / 10f * (priceRange.endInclusive - priceRange.start)).toString()
+                                text = (priceRange.start + index / 10f * (priceRange.endInclusive - priceRange.start)).toString(),
+                                maxLines = 1
                             )
                         }
                     }
@@ -510,6 +528,7 @@ fun Test() {
                     var textHeight by remember { mutableStateOf(0) }
                     Text(
                         text = stockData.history.last().toString(),
+                        maxLines = 1,
                         color = Color.White,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
@@ -524,7 +543,7 @@ fun Test() {
                             .align(Alignment.TopEnd)
                             .offset(
                                 y = LocalDensity.current.run {
-                                    (chartSize.height.toDp() - (32.dp + 4.dp)) * changeRate - textHeight.toDp() * 0.5f
+                                    (chartSize.height.toDp() - (32.dp + 4.dp)) * getRate(stockData.history.last()) - textHeight.toDp() * 0.5f
                                 }
                             )
                             .background(
@@ -537,6 +556,15 @@ fun Test() {
                     )
 
                     Text(
+                        text = "04:32", // TODO
+                        fontSize = LocalDensity.current.run { 16.dp.toSp() },
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .width(64.dp)
+                            .align(Alignment.BottomEnd)
+                    )
+
+                    Text(
                         text = stringResource(id = R.string.app_name),
                         style = MaterialTheme.typography.titleLarge,
                         fontSize = with (LocalDensity.current) { 30.dp.toSp() },
@@ -545,7 +573,7 @@ fun Test() {
                         modifier = Modifier
                             .padding(
                                 bottom = 32.dp + 16.dp,
-                                end = 16.dp
+                                start = 16.dp
                             )
                             .align(Alignment.BottomStart)
                     )
@@ -553,7 +581,6 @@ fun Test() {
 
                 }
 
-                
             }
         }
     }
