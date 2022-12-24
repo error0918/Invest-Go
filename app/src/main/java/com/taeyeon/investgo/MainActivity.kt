@@ -14,10 +14,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,8 +27,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -204,7 +203,7 @@ fun Test() {
             icon = Icons.Rounded.Money,
             name = "달러 ($/\\)",
             history = arrayListOf(
-                1100f, 1150f, 1200f, 1190f, 1130f, 1100f, 1070f, 1030f, 1040f, 1140f
+                1100f, 1150f, 1200f, 1190f, 1130f, 1100f, 1070f, 1030f, 1040f, 1140f, 1100f, 1120f, 1130f
             )
         )
     }
@@ -215,13 +214,16 @@ fun Test() {
     var changeRate by remember { mutableStateOf(0f) }
     var priceRange by remember { mutableStateOf(stockData.history[0] .. stockData.history[0]) }
 
+    // Internal Function
+    val getRate = { price: Float -> (priceRange.endInclusive - price) / (priceRange.endInclusive - priceRange.start) }
+
     LaunchedEffect(stockData.history) {
         changeAmount = stockData.history.last() - stockData.history[if (stockData.history.size == 0) 0 else stockData.history.size - 2]
         stockData.history.forEach {
             if (it < priceRange.start) priceRange = it .. priceRange.endInclusive
             else if (it > priceRange.endInclusive) priceRange = priceRange.start .. it
         }
-        changeRate = (priceRange.endInclusive - stockData.history.last()) / (priceRange.endInclusive - priceRange.start)
+        changeRate = getRate(stockData.history.last())
     }
 
 
@@ -351,10 +353,72 @@ fun Test() {
                         .onSizeChanged { chartSize = it }
                 ) {
 
+                    val scrollState = rememberScrollState()
+                    val oneBlock = LocalDensity.current.run {
+                        (chartSize.width.toDp() - (64.dp + 2.dp)) * 0.1f to chartSize.height.toDp() - (32.dp + 16.dp + 16.dp)
+                    }
                     Row(
                         modifier = Modifier
+                            .padding(
+                                top = 16.dp,
+                                end = 64.dp + 2.dp,
+                                bottom = 32.dp + 16.dp
+                            )
+                            .fillMaxSize()
+                            .horizontalScroll(state = scrollState)
                     ) {
-                        //
+                        val primary = MaterialTheme.colorScheme.primary
+                        Canvas(
+                            modifier = Modifier
+                                .width(oneBlock.first * stockData.history.size)
+                                .fillMaxHeight()
+                        ) {
+                            drawPath(
+                                path = Path().apply {
+                                    moveTo(x = 0f, y = oneBlock.second.toPx())
+                                    lineTo(x = 0f, y = oneBlock.second.toPx() * getRate(stockData.history.first()))
+                                    for (index in 0 until stockData.history.size) {
+                                        lineTo(x = oneBlock.first.toPx() * (index + 0.5f), y = oneBlock.second.toPx() * getRate(stockData.history[index]))
+                                    }
+                                    lineTo(x = oneBlock.first.toPx() * stockData.history.size, y = oneBlock.second.toPx() * getRate(stockData.history.last()))
+                                    lineTo(x = oneBlock.first.toPx() * stockData.history.size, y = oneBlock.second.toPx())
+                                    close()
+                                },
+                                color = primary.copy(alpha = 0.2f)
+                            )
+                            drawPath(
+                                path = Path().apply {
+                                    moveTo(x = 0f, y = oneBlock.second.toPx() * getRate(stockData.history.first()))
+                                    for (index in 0 until stockData.history.size) {
+                                        lineTo(x = oneBlock.first.toPx() * (index + 0.5f), y = oneBlock.second.toPx() * getRate(stockData.history[index]))
+                                    }
+                                    lineTo(x = oneBlock.first.toPx() * stockData.history.size, y = oneBlock.second.toPx() * getRate(stockData.history.last()))
+                                },
+                                color = primary,
+                                style = Stroke(
+                                    width = 4.dp.toPx()
+                                )
+                            )
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .padding(end = 64.dp + 2.dp,)
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter)
+                            .horizontalScroll(state = scrollState)
+                    ) {
+                        for (index in 0 until stockData.history.size) {
+                            if (index % interval.toInt() == 0) {
+                                Text(
+                                    text = index.toString(),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .width(oneBlock.first)
+                                )
+                            }
+                        }
                     }
 
                     val contentColor = LocalContentColor.current
@@ -396,7 +460,7 @@ fun Test() {
                             end = Offset(x = size.width, y = size.height * changeRate),
                             strokeWidth = 2.dp.toPx(),
                             cap = StrokeCap.Round,
-                            alpha = 0.2f,
+                            alpha = 0.6f,
                             pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
                         )
                     }
@@ -465,9 +529,9 @@ fun Test() {
                             )
                             .background(
                                 color =
-                                    if (changeAmount > 0f) Color.Red
-                                    else if (changeAmount < 0f) Color.Blue
-                                    else Color.Gray,
+                                if (changeAmount > 0f) Color.Red
+                                else if (changeAmount < 0f) Color.Blue
+                                else Color.Gray,
                                 shape = RoundedCornerShape(percent = 10)
                             )
                     )
@@ -480,10 +544,8 @@ fun Test() {
                         color = LocalContentColor.current,
                         modifier = Modifier
                             .padding(
-                                top = 4.dp,
-                                bottom = 32.dp + 4.dp,
-                                start = 4.dp,
-                                end = 4.dp
+                                bottom = 32.dp + 16.dp,
+                                end = 16.dp
                             )
                             .align(Alignment.BottomStart)
                     )
