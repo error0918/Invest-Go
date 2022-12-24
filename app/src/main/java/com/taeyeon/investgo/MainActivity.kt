@@ -15,6 +15,7 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -27,7 +28,10 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -207,6 +211,7 @@ fun Test() {
 
     // Additional Stock Data
     var changeAmount by remember { mutableStateOf(0f) }
+    var changeRate by remember { mutableStateOf(0f) }
     var priceRange by remember { mutableStateOf(stockData.history[0] .. stockData.history[0]) }
 
     LaunchedEffect(stockData.history) {
@@ -215,6 +220,7 @@ fun Test() {
             if (it < priceRange.start) priceRange = it .. priceRange.endInclusive
             else if (it > priceRange.endInclusive) priceRange = priceRange.start .. it
         }
+        changeRate = (priceRange.endInclusive - stockData.history.last()) / (priceRange.endInclusive - priceRange.start)
     }
 
 
@@ -346,6 +352,50 @@ fun Test() {
 
                     //
 
+                    val contentColor = LocalContentColor.current
+                    Canvas(
+                        modifier = Modifier
+                            .padding(
+                                top = 16.dp,
+                                end = 64.dp + 2.dp,
+                                bottom = 32.dp + 16.dp
+                            )
+                            .fillMaxSize()
+                    ) {
+                        for (index in 0 .. 10) {
+                            if (index != 0 && index != 10) {
+                                drawLine(
+                                    color = contentColor,
+                                    start = Offset(x = size.width * index / 10f, y = 0f),
+                                    end = Offset(x = size.width * index / 10f, y = size.height),
+                                    strokeWidth = 2.dp.toPx(),
+                                    cap = StrokeCap.Round,
+                                    alpha = 0.2f
+                                )
+                            }
+                            drawLine(
+                                color = contentColor,
+                                start = Offset(x = 0f, y = size.height * index / 10f),
+                                end = Offset(x = size.width, y = size.height * index / 10f),
+                                strokeWidth = 2.dp.toPx(),
+                                cap = StrokeCap.Round,
+                                alpha = 0.2f
+                            )
+                        }
+                        drawLine(
+                            color =
+                                if (changeAmount > 0f) Color.Red
+                                else if (changeAmount < 0f) Color.Blue
+                                else Color.Gray,
+                            start = Offset(x = 0f, y = size.height * changeRate),
+                            end = Offset(x = size.width, y = size.height * changeRate),
+                            strokeWidth = 2.dp.toPx(),
+                            cap = StrokeCap.Round,
+                            alpha = 0.2f,
+                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
+                        )
+                    }
+
                     Spacer(
                         modifier = Modifier
                             .padding(
@@ -388,6 +438,7 @@ fun Test() {
                         }
                     }
 
+                    var textHeight by remember { mutableStateOf(0) }
                     Text(
                         text = stockData.history.last().toString(),
                         color = Color.White,
@@ -400,10 +451,11 @@ fun Test() {
                                 end = 4.dp
                             )
                             .width(64.dp - 8.dp)
+                            .onSizeChanged { textHeight = it.height }
                             .align(Alignment.TopEnd)
                             .offset(
                                 y = LocalDensity.current.run {
-                                    (chartSize.height.toDp() - (32.dp + 4.dp)) * (priceRange.endInclusive - stockData.history.last()) / (priceRange.endInclusive - priceRange.start)
+                                    (chartSize.height.toDp() - (32.dp + 4.dp)) * changeRate - textHeight.toDp() * 0.5f
                                 }
                             )
                             .background(
