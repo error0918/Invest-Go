@@ -20,17 +20,20 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Money
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
@@ -180,15 +183,50 @@ class MainActivity : ComponentActivity() {
 }
 
 
+
+data class StockData(
+    val icon: ImageVector? = null,
+    val name: String,
+    val history: ArrayList<Float>
+)
+
+
 @Composable
 fun Test() {
+    // Parameter
+    val stockData = remember {
+        StockData(
+            icon = Icons.Rounded.Money,
+            name = "달러 ($/\\)",
+            history = arrayListOf(
+                1100f, 1150f, 1200f, 1190f, 1130f, 1100f, 1070f, 1030f, 1040f, 1140f
+            )
+        )
+    }
+
+
+    // Additional Stock Data
+    var changeAmount by remember { mutableStateOf(0f) }
+    var priceRange by remember { mutableStateOf(stockData.history[0] .. stockData.history[0]) }
+
+    LaunchedEffect(stockData.history) {
+        changeAmount = stockData.history.last() - stockData.history[if (stockData.history.size == 0) 0 else stockData.history.size - 2]
+        stockData.history.forEach {
+            if (it < priceRange.start) priceRange = it .. priceRange.endInclusive
+            else if (it > priceRange.endInclusive) priceRange = priceRange.start .. it
+        }
+    }
+
+
+    // Composable Variable
+    var refreshTime by rememberSaveable { mutableStateOf(0.1f) }
+
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
     ) {
-        var refreshTime by rememberSaveable { mutableStateOf(0.1f) }
-
         Surface(
             color =
                 if (!isSystemInDarkTheme()) Color.LightGray
@@ -255,14 +293,28 @@ fun Test() {
                         )
                     }
 
-                    Text(
-                        text = "달러 ($)", // TODO
-                        fontSize = LocalDensity.current.run { 32.dp.toSp() },
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = gmarketSans,
+                    Row(
                         modifier = Modifier
-                            .align(Alignment.Center)
-                    )
+                            .height(32.dp)
+                            .align(Alignment.Center),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        stockData.icon?.let {
+                            Icon(
+                                imageVector = it,
+                                contentDescription = stockData.name,
+                                modifier = Modifier
+                                    .size(32.dp)
+                            )
+                        }
+                        Text(
+                            text = stockData.name, // TODO
+                            fontSize = LocalDensity.current.run { 32.dp.toSp() },
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = gmarketSans
+                        )
+                    }
 
                     Text(
                         text = "04:32", // TODO
@@ -276,14 +328,95 @@ fun Test() {
 
 
                 Surface(
-                    modifier = Modifier.fillMaxWidth().height(2.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.dp),
                     color = LocalContentColor.current.copy(alpha = 0.5f),
                     shape = CircleShape,
                     content = {  }
                 )
 
 
-                //
+                var chartSize by remember { mutableStateOf(IntSize.Zero) }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .onSizeChanged { chartSize = it }
+                ) {
+
+                    //
+
+                    Spacer(
+                        modifier = Modifier
+                            .padding(
+                                bottom = 32.dp,
+                                end = 64.dp
+                            )
+                            .width(2.dp)
+                            .fillMaxHeight()
+                            .align(Alignment.CenterEnd)
+                            .background(LocalContentColor.current)
+                    )
+
+                    Spacer(
+                        modifier = Modifier
+                            .padding(bottom = 32.dp - 1.dp)
+                            .fillMaxWidth()
+                            .height(2.dp)
+                            .align(Alignment.BottomCenter)
+                            .background(LocalContentColor.current)
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .padding(
+                                top = 4.dp,
+                                bottom = 32.dp + 4.dp,
+                                start = 4.dp,
+                                end = 4.dp
+                            )
+                            .width(64.dp - 8.dp)
+                            .fillMaxHeight()
+                            .align(Alignment.CenterEnd),
+                        verticalArrangement = Arrangement.SpaceBetween,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        for (index in 10 downTo 0) {
+                            Text(
+                                text = (priceRange.start + index / 10f * (priceRange.endInclusive - priceRange.start)).toString()
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = stockData.history.last().toString(),
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(
+                                top = 4.dp,
+                                bottom = 32.dp + 4.dp,
+                                start = 4.dp,
+                                end = 4.dp
+                            )
+                            .width(64.dp - 8.dp)
+                            .align(Alignment.TopEnd)
+                            .offset(
+                                y = LocalDensity.current.run {
+                                    (chartSize.height.toDp() - (32.dp + 4.dp)) * (priceRange.endInclusive - stockData.history.last()) / (priceRange.endInclusive - priceRange.start)
+                                }
+                            )
+                            .background(
+                                color =
+                                    if (changeAmount > 0f) Color.Red
+                                    else if (changeAmount < 0f) Color.Blue
+                                    else Color.Gray,
+                                shape = RoundedCornerShape(percent = 10)
+                            )
+                    )
+
+
+                }
 
                 
             }
