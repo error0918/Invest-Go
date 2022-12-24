@@ -13,7 +13,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
@@ -225,7 +226,7 @@ fun Test() {
 
 
     // Composable Variable
-    var refreshTime by rememberSaveable { mutableStateOf(0.1f) }
+    var interval by rememberSaveable { mutableStateOf(1f) }
 
 
     Box(
@@ -271,14 +272,14 @@ fun Test() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "0.1초",
+                            text = "1초",
                             fontSize = LocalDensity.current.run { 24.dp.toSp() },
                             fontFamily = gmarketSans
                         )
                         Switch(
-                            checked = refreshTime == 1f,
+                            checked = interval == 10f,
                             onCheckedChange = {
-                                refreshTime = if (refreshTime == 0.1f) 1f else 0.1f
+                                interval = if (interval == 1f) 10f else 1f
                             },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = LocalContentColor.current,
@@ -293,7 +294,7 @@ fun Test() {
                             modifier = Modifier.height(24.dp)
                         )
                         Text(
-                            text = "1초",
+                            text = "10초",
                             fontSize = LocalDensity.current.run { 24.dp.toSp() },
                             fontFamily = gmarketSans
                         )
@@ -350,7 +351,11 @@ fun Test() {
                         .onSizeChanged { chartSize = it }
                 ) {
 
-                    //
+                    Row(
+                        modifier = Modifier
+                    ) {
+                        //
+                    }
 
                     val contentColor = LocalContentColor.current
                     Canvas(
@@ -465,6 +470,22 @@ fun Test() {
                                     else Color.Gray,
                                 shape = RoundedCornerShape(percent = 10)
                             )
+                    )
+
+                    Text(
+                        text = stringResource(id = R.string.app_name),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontSize = with (LocalDensity.current) { 30.dp.toSp() },
+                        fontWeight = FontWeight.Bold,
+                        color = LocalContentColor.current,
+                        modifier = Modifier
+                            .padding(
+                                top = 4.dp,
+                                bottom = 32.dp + 4.dp,
+                                start = 4.dp,
+                                end = 4.dp
+                            )
+                            .align(Alignment.BottomStart)
                     )
 
 
