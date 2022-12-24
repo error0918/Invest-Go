@@ -13,14 +13,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class GameViewModel(
-    name: String = getRandomName(),
-    time: Int = 60 * 5,
-    onEnd: () -> Unit = {  }
+    val name: String = getRandomName(),
+    val time: Int = 60 * 5,
+    val onEnd: () -> Unit = {  }
 ) : ViewModel() {
     private var isTimerWorking = true
+    private var isTimerDoing = true
     private var remainingSeconds = time
 
-    val name by mutableStateOf(name)
     var remainingVisibleTime by mutableStateOf("${getDigitNumber(remainingSeconds / 60, 2)}:${getDigitNumber(remainingSeconds % 60, 2)}")
 
     var score by mutableStateOf(Settings.DEFAULT_MONEY)
@@ -32,23 +32,29 @@ class GameViewModel(
     init {
         CoroutineScope(Dispatchers.IO).launch {
             while (isTimerWorking) {
-                delay(1000)
-                remainingSeconds--
-                remainingVisibleTime = "${getDigitNumber(remainingSeconds / 60, 2)}:${getDigitNumber(remainingSeconds % 60, 2)}"
-                if (remainingSeconds <= 0) {
-                    stopTimer()
-                    onEnd()
+                if (isTimerDoing) {
+                    delay(1000)
+                    remainingSeconds--
+                    remainingVisibleTime = "${getDigitNumber(remainingSeconds / 60, 2)}:${getDigitNumber(remainingSeconds % 60, 2)}"
+                    if (remainingSeconds <= 0) {
+                        stopTimer()
+                        onEnd()
+                    }
                 }
             }
         }
     }
 
 
-    fun stopTimer() {
-        isTimerWorking = false
+    fun resumeTimer() {
+        isTimerDoing = true
     }
 
-    fun resumeTimer() {
-        isTimerWorking = true
+    fun stopTimer() {
+        isTimerDoing = false
+    }
+
+    fun endTimer() {
+        isTimerWorking = false
     }
 }
