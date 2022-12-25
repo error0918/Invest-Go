@@ -5,6 +5,7 @@ package com.taeyeon.investgo
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -192,31 +193,58 @@ class MainActivity : ComponentActivity() {
 }
 
 
-
 data class StockData(
     val icon: ImageVector? = null,
     val name: String,
+    val stockPriceData: StockPriceData,
     val history: SnapshotStateList<Float>
-)
+) {
+    fun update() {
+        history.add(stockPriceData.apply { update() }.price)
+    }
+}
+
+
+data class StockPriceData(
+    var trend: Float,
+    var price: Float,
+    var trendChangeRate: Float,
+    var priceChangeRate: Float
+) {
+    fun update() {
+        trend += (Random.nextFloat() * 2f - 0.997f) * trendChangeRate
+        price *= 1f + (trend + Random.nextFloat() * 2f - 0.997f) * priceChangeRate
+    }
+}
 
 
 @Composable
 fun Test() {
     // Parameter
-    val stockData = remember {
-        StockData(
-            icon = Icons.Rounded.Computer,
-            name = "태연전자 (\\)",
-            history = mutableStateListOf(
-                1100f, 1150f, 1200f, 1190f, 1130f, 1100f, 1070f, 1030f, 1040f, 1140f, 1100f, 1120f, 1130f
+    val stockData by remember {
+        mutableStateOf(
+            StockData(
+                icon = Icons.Rounded.Computer,
+                name = "태연전자 (\\)",
+                stockPriceData = StockPriceData(
+                    trend = 0.0f,
+                    price = 10000f,
+                    trendChangeRate = 0.001f,
+                    priceChangeRate = 0.02f
+                ),
+                history = mutableStateListOf(
+                    10000.1f, 10000f, 10000f, 10000f
+                )
             )
         )
     }
+    Log.e("PR", "tr: ${stockData.stockPriceData.trend} / pr: ${stockData.stockPriceData.price}")
+
 
     LaunchedEffect(true) {
         while (true) {
             delay(100)
-            stockData.history.add(stockData.history.last() * ((Random.nextFloat() - 0.5f) * 0.05f + 1f))
+            stockData.update()
         }
     }
 
@@ -377,11 +405,6 @@ fun Test() {
 
                     val density = LocalDensity.current
                     LaunchedEffect(changeAmount) {
-                        if (stockData.history.size == interval.toInt() * 100)
-                            scrollState.animateScrollTo(
-                                value = scrollState.value + density.run { oneBlock.first.toPx() * 0.5f }.roundToInt(),
-                                animationSpec = tween(80, easing = LinearEasing)
-                            )
                         if (autoScroll && scrollState.canScrollForward)
                             scrollState.animateScrollTo(
                                 value = scrollState.value + density.run { oneBlock.first.toPx() / (interval * 10f) }.roundToInt(),
