@@ -51,6 +51,7 @@ import com.taeyeon.investgo.ui.ReadyForGameScreen
 import com.taeyeon.investgo.ui.WelcomeScreen
 import kotlinx.coroutines.delay
 import kotlin.math.ceil
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
@@ -376,7 +377,16 @@ fun Test() {
 
                     val density = LocalDensity.current
                     LaunchedEffect(changeAmount) {
-                        if (autoScroll) scrollState.animateScrollTo(scrollState.value + density.run { oneBlock.first.toPx() / (interval * 8.5f) }.toInt()) // So What?
+                        if (stockData.history.size == interval.toInt() * 100)
+                            scrollState.animateScrollTo(
+                                value = scrollState.value + density.run { oneBlock.first.toPx() * 0.5f }.roundToInt(),
+                                animationSpec = tween(80, easing = LinearEasing)
+                            )
+                        if (autoScroll && scrollState.canScrollForward)
+                            scrollState.animateScrollTo(
+                                value = scrollState.value + density.run { oneBlock.first.toPx() / (interval * 10f) }.roundToInt(),
+                                animationSpec = tween(80, easing = LinearEasing)
+                            )
                     }
 
                     Row(
@@ -395,31 +405,36 @@ fun Test() {
                                 .width(oneBlock.first * ((stockData.history.size) / (interval * 10) + (if (stockData.history.size >= interval * 100f) 1f else 0.5f)))
                                 .fillMaxHeight()
                         ) {
+                            val path = Path().apply {
+                                var x = 0f
+
+                                moveTo(x = x, y = oneBlock.second.toPx() * getRate(stockData.history.first()))
+
+                                x += oneBlock.first.toPx() * 0.5f
+                                for (index in 0 until stockData.history.size) {
+                                    x += oneBlock.first.toPx() / (interval * 10)
+                                    lineTo(x = x, y = oneBlock.second.toPx() * getRate(stockData.history[index]))
+                                }
+
+                                if (stockData.history.size >= interval * 100) x += oneBlock.first.toPx() * 0.5f
+                                lineTo(x = x, y = oneBlock.second.toPx() * getRate(stockData.history.last()))
+                            }
+
                             drawPath(
-                                path = Path().apply {
-                                    moveTo(x = 0f, y = oneBlock.second.toPx())
-                                    lineTo(x = 0f, y = oneBlock.second.toPx() * getRate(stockData.history.first()))
-                                    for (index in 0 until stockData.history.size) {
-                                        lineTo(x = oneBlock.first.toPx() * (index / (interval * 10) + 0.5f), y = oneBlock.second.toPx() * getRate(stockData.history[index]))
-                                    }
-                                    lineTo(x = oneBlock.first.toPx() * ((stockData.history.size - 1) / (interval * 10) + (if (stockData.history.size >= interval * 100f) 1f else 0.5f)), y = oneBlock.second.toPx() * getRate(stockData.history.last()))
-                                    lineTo(x = oneBlock.first.toPx() * ((stockData.history.size - 1) / (interval * 10) + (if (stockData.history.size >= interval * 100f) 1f else 0.5f)), y = oneBlock.second.toPx())
-                                    close()
-                                },
-                                color = primary.copy(alpha = 0.2f)
-                            )
-                            drawPath(
-                                path = Path().apply {
-                                    moveTo(x = 0f, y = oneBlock.second.toPx() * getRate(stockData.history.first()))
-                                    for (index in 0 until stockData.history.size) {
-                                        lineTo(x = oneBlock.first.toPx() * (index / (interval * 10) + 0.5f), y = oneBlock.second.toPx() * getRate(stockData.history[index]))
-                                    }
-                                    lineTo(x = oneBlock.first.toPx() * ((stockData.history.size - 1) / (interval * 10) + (if (stockData.history.size >= interval * 100) 1f else 0.5f)), y = oneBlock.second.toPx() * getRate(stockData.history.last()))
-                                },
+                                path = path,
                                 color = primary,
                                 style = Stroke(
                                     width = 4.dp.toPx()
                                 )
+                            )
+
+                            drawPath(
+                                path = path.apply {
+                                    lineTo(x = size.width, y = size.height)
+                                    lineTo(x = 0f, y = size.height)
+                                    close()
+                                },
+                                color = primary.copy(alpha = 0.2f)
                             )
                         }
                     }
@@ -431,7 +446,7 @@ fun Test() {
                             .align(Alignment.BottomCenter)
                             .horizontalScroll(state = scrollState)
                     ) {
-                        for (index in 0 .. (ceil(stockData.history.size / (interval * 10)).toInt()).let { if (it < 10) 10 else it }) {
+                        for (index in 0 .. (ceil(stockData.history.size / (interval * 10)).toInt())) {
                             Text(
                                 text = (index * interval).toInt().toString(),
                                 textAlign = TextAlign.Center,
