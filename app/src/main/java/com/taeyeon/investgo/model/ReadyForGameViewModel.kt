@@ -8,7 +8,7 @@ import com.taeyeon.investgo.data.Settings
 
 class ReadyForGameViewModel : ViewModel() {
     val timeList = listOf(
-        60 * 2 to "02:00",
+        60 * 3 to "03:00",
         60 * 5 to "05:00",
         60 * 7 to "07:00"
     )

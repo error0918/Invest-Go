@@ -75,7 +75,7 @@ fun GameScreen(
                 )
                 .padding(32.dp)
         ) {
-            val (menuIconButton, timerText, scoreText1, scoreText2, tradeCowColumn) = createRefs()
+            val (menuIconButton, timerText, scoreText1, scoreText2, tradeCowColumn, situationColumn) = createRefs()
 
             IconButton(
                 onClick = {
@@ -160,14 +160,14 @@ fun GameScreen(
                         top.linkTo(menuIconButton.bottom, margin = 32.dp)
                         bottom.linkTo(parent.bottom)
                         start.linkTo(parent.start)
-                        width = Dimension.percent(0.5f)
+                        width = Dimension.percent(0.475f)
                         height = Dimension.fillToConstraints
                     }
             ) {
                 var expandedIndex by rememberSaveable { mutableStateOf<Int?>(null) }
 
                 for (index in 0 .. 2) {
-                    Spacer(modifier = Modifier.weight(1f))
+                    if (index != 0) Spacer(modifier = Modifier.weight(1f))
                     AnimatedVisibility(visible = expandedIndex == null || expandedIndex == index) {
                         Surface(
                             modifier = Modifier
@@ -207,12 +207,12 @@ fun GameScreen(
                                             Icon(
                                                 imageVector = Icons.Rounded.CurrencyBitcoin,
                                                 contentDescription = "집 가고 싶다", // TODO
-                                                modifier = Modifier.size(30.dp)
+                                                modifier = Modifier.size(48.dp)
                                             )
                                             Text(
                                                 text = "거래소",
                                                 fontFamily = gmarketSans,
-                                                fontSize = LocalDensity.current.run { 24.dp.toSp() },
+                                                fontSize = LocalDensity.current.run { 40.dp.toSp() },
                                                 fontWeight = FontWeight.Bold,
                                                 modifier = Modifier.offset(y = 2.dp)
                                             )
@@ -223,7 +223,7 @@ fun GameScreen(
                                                 imageVector = if (expandedIndex != null) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
                                                 contentDescription = "집 가고 싶다", // TODO
                                                 tint = LocalContentColor.current.copy(alpha = 0.5f),
-                                                modifier = Modifier.size(30.dp)
+                                                modifier = Modifier.size(48.dp)
                                             )
                                         }
 
@@ -258,12 +258,36 @@ fun GameScreen(
                                                             Text(
                                                                 text = "1,000원",
                                                                 fontFamily = gmarketSans,
-                                                                fontSize = LocalDensity.current.run { 15.dp.toSp() },
+                                                                fontSize = LocalDensity.current.run { 20.dp.toSp() },
                                                                 fontWeight = FontWeight.Medium,
                                                                 color = Color.Red,
                                                                 modifier = Modifier.align(Alignment.TopEnd)
                                                             )
-                                                            // TODO
+                                                            Row(
+                                                                modifier = Modifier.align(Alignment.BottomEnd),
+                                                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                                                verticalAlignment = Alignment.CenterVertically
+                                                            ) {
+                                                                Text(
+                                                                    text = "추세: -0.00129",
+                                                                    fontFamily = gmarketSans,
+                                                                    fontSize = LocalDensity.current.run { 12.dp.toSp() },
+                                                                    fontWeight = FontWeight.Light,
+                                                                    color = Color.Blue
+                                                                )
+                                                                Text(
+                                                                    text = "가격 변동률: 2%",
+                                                                    fontFamily = gmarketSans,
+                                                                    fontSize = LocalDensity.current.run { 12.dp.toSp() },
+                                                                    fontWeight = FontWeight.Light
+                                                                )
+                                                                Text(
+                                                                    text = "추세 변동률: 1%",
+                                                                    fontFamily = gmarketSans,
+                                                                    fontSize = LocalDensity.current.run { 12.dp.toSp() },
+                                                                    fontWeight = FontWeight.Light
+                                                                )
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -276,8 +300,7 @@ fun GameScreen(
                                             ) {
                                                 for (stockIndex in 0..2) { // Only 3
                                                     Row(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth(),
+                                                        modifier = Modifier.fillMaxWidth(),
                                                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                                                         verticalAlignment = Alignment.CenterVertically
                                                     ) {
@@ -335,11 +358,40 @@ fun GameScreen(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
 
-            // TODO
+            Column(
+                modifier = Modifier
+                    .constrainAs(situationColumn) {
+                        top.linkTo(scoreText2.bottom, margin = 32.dp)
+                        bottom.linkTo(parent.bottom)
+                        end.linkTo(parent.end)
+                        width = Dimension.percent(0.475f)
+                        height = Dimension.fillToConstraints
+                    },
+                verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Bottom)
+            ) {
+
+                // TODO
+                Button(
+                    onClick = { /*TODO*/ },
+                    shape = MaterialTheme.shapes.medium,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = "자산 모두 판매하기",
+                        fontSize = with(LocalDensity.current) { 40.dp.toSp() },
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+            }
 
         }
 
