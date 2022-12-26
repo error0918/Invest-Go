@@ -226,7 +226,7 @@ fun GameScreen(
                                         }
 
                                         if (expandedIndex != null) {
-                                            for (i in 0..10) {
+                                            for (stockIndex in 0..10) {
                                                 Surface(
                                                     modifier = Modifier
                                                         .fillMaxWidth(),
@@ -245,7 +245,7 @@ fun GameScreen(
                                                 }
                                             }
                                         } else {
-                                            for (ii in 0..2) { // Only 3
+                                            for (stockIndex in 0..2) { // Only 3
                                                 //
                                             }
                                             val contentColor = LocalContentColor.current
