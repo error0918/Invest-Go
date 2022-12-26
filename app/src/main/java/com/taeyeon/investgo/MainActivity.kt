@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Computer
+import androidx.compose.material.icons.rounded.CurrencyBitcoin
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -164,7 +165,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
-                    Test()
+                    //Test()
                 }
             }
         }
@@ -212,28 +213,30 @@ data class StockPriceData(
     var priceChangeRate: Float
 ) {
     fun update() {
-        trend += (Random.nextFloat() * 2f - 0.997f) * trendChangeRate
-        price *= 1f + (trend + Random.nextFloat() * 2f - 0.997f) * priceChangeRate
+        trend += (Random.nextFloat() * 2f - 0.996f) * trendChangeRate - trend * 0.01f
+        price *= 1f + (trend + Random.nextFloat() * 2f - 0.996f) * priceChangeRate
     }
 }
 
 
 @Composable
-fun Test() {
+fun Test(
+    modifier: Modifier = Modifier
+) {
     // Parameter
     val stockData by remember {
         mutableStateOf(
             StockData(
-                icon = Icons.Rounded.Computer,
-                name = "태연전자 (\\)",
+                icon = Icons.Rounded.CurrencyBitcoin,
+                name = "이둬뤼움 (\\)",
                 stockPriceData = StockPriceData(
-                    trend = 0.0f,
-                    price = 10000f,
-                    trendChangeRate = 0.001f,
-                    priceChangeRate = 0.02f
+                    trend = 0.02f,
+                    price = 600000f,
+                    trendChangeRate = 0.003f,
+                    priceChangeRate = 0.05f
                 ),
                 history = mutableStateListOf(
-                    10000.1f, 10000f, 10000f, 10000f
+                    600000.1f, 600000f, 600000f, 600000f
                 )
             )
         )

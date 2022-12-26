@@ -1,11 +1,14 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+@file:Suppress("OPT_IN_IS_NOT_ENABLED")
+
 package com.taeyeon.investgo.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -14,9 +17,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.input.pointer.pointerInput
@@ -33,6 +38,7 @@ import androidx.constraintlayout.compose.Dimension
 import com.taeyeon.investgo.R
 import com.taeyeon.investgo.model.GameViewModel
 import com.taeyeon.investgo.model.MainViewModel
+import com.taeyeon.investgo.theme.gmarketSans
 
 @Composable
 fun GameScreen(
@@ -67,7 +73,7 @@ fun GameScreen(
                 )
                 .padding(32.dp)
         ) {
-            val (menuIconButton, timerText, scoreText1, scoreText2) = createRefs()
+            val (menuIconButton, timerText, scoreText1, scoreText2, tradeCowColumn) = createRefs()
 
             IconButton(
                 onClick = {
@@ -145,6 +151,131 @@ fun GameScreen(
                         end.linkTo(parent.end)
                     }
             )
+
+            Column(
+                modifier = Modifier
+                    .constrainAs(tradeCowColumn) {
+                        top.linkTo(menuIconButton.bottom, margin = 32.dp)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        width = Dimension.percent(0.5f)
+                        height = Dimension.fillToConstraints
+                    }
+            ) {
+                var expandedIndex by rememberSaveable { mutableStateOf<Int?>(null) }
+
+                for (index in 0 .. 3) {
+                    Spacer(modifier = Modifier.weight(1f))
+                    AnimatedVisibility(visible = expandedIndex == null || expandedIndex == index) {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            color = LocalContentColor.current.copy(alpha = 0.6f),
+                            shape = RoundedCornerShape(16.dp),
+                            border = BorderStroke(
+                                width = 2.dp,
+                                color = LocalContentColor.current
+                            ),
+                            onClick = { expandedIndex = if (expandedIndex == null) index else null }
+                        ) {
+                            Surface(
+                                modifier = Modifier
+                                    .padding(16.dp),
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(8.dp),
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .animateContentSize()
+                                        .verticalScroll(
+                                            state = rememberScrollState(),
+                                            enabled = expandedIndex != null
+                                        ),
+                                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    CompositionLocalProvider(
+                                        LocalContentColor provides if (isSystemInDarkTheme()) Color.DarkGray else Color.LightGray
+                                    ) {
+
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.CurrencyBitcoin,
+                                                contentDescription = "집 가고 싶다", // TODO
+                                                modifier = Modifier.size(30.dp)
+                                            )
+                                            Text(
+                                                text = "거래소",
+                                                fontFamily = gmarketSans,
+                                                fontSize = LocalDensity.current.run { 24.dp.toSp() },
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.offset(y = 2.dp)
+                                            )
+                                            Spacer(
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            Icon(
+                                                imageVector = if (expandedIndex != null) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
+                                                contentDescription = "집 가고 싶다", // TODO
+                                                tint = LocalContentColor.current.copy(alpha = 0.5f),
+                                                modifier = Modifier.size(30.dp)
+                                            )
+                                        }
+
+                                        if (expandedIndex != null) {
+                                            for (i in 0..10) {
+                                                Surface(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth(),
+                                                    color = LocalContentColor.current.copy(alpha = 0.6f),
+                                                    shape = RoundedCornerShape(8.dp),
+                                                    border = BorderStroke(
+                                                        width = 2.dp,
+                                                        color = LocalContentColor.current
+                                                    )
+                                                ) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .height(60.dp)
+                                                            .padding(8.dp)
+                                                    )
+                                                }
+                                            }
+                                        } else {
+                                            for (ii in 0..2) { // Only 3
+                                                //
+                                            }
+                                            val contentColor = LocalContentColor.current
+                                            Canvas(
+                                                modifier = Modifier
+                                                    .width(4.dp)
+                                                    .height(16.dp)
+                                                    .align(Alignment.CenterHorizontally)
+                                            ) {
+                                                for (drawIndex in 0..2) {
+                                                    drawCircle(
+                                                        color = contentColor,
+                                                        radius = 2.dp.toPx(),
+                                                        center = Offset(
+                                                            x = 2.dp.toPx(),
+                                                            y = (2 + drawIndex * 6).dp.toPx()
+                                                        ),
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
 
         }
 
