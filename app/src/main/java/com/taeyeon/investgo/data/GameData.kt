@@ -2,12 +2,16 @@ package com.taeyeon.investgo.data
 
 data class GameData(
     val marketData: List<TradeCowData> = ArrayList(com.taeyeon.investgo.data.marketData),
-    var won: Int = Settings.DEFAULT_MONEY,
-    val propertyData: List<List<Int>> = marketData.let {
-        val arrayList = arrayListOf<List<Int>>()
-        it.forEach { tradeCowData -> arrayList.add(List(tradeCowData.stockDataList.size) { 0 }) }
-        arrayList.toList()
-    }
+    val propertyData: ArrayList<ArrayList<Int>> = marketData.let {
+        val outerArrayList = arrayListOf<ArrayList<Int>>()
+        it.forEach { tradeCowData ->
+            val innerArrayList = arrayListOf<Int>()
+            for (index in tradeCowData.stockDataList.indices) innerArrayList.add(0)
+            outerArrayList.add(innerArrayList)
+        }
+        outerArrayList
+    },
+    var won: Float = Settings.DEFAULT_MONEY
 ) {
     fun getScore(): Float {
         var score = won.toFloat()

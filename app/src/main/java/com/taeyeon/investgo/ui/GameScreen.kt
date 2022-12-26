@@ -638,7 +638,16 @@ fun GameScreen(
                                         verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         Button(
-                                            onClick = { /*TODO*/ },
+                                            onClick = { /*TODO*/
+                                                mainViewModel.gameViewModel.gameData.won -= price * wonValue
+                                                mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex] += wonValue
+
+                                                isBuyingEnabled = mainViewModel.gameViewModel.gameData.won >= mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].stockDataList[stockDataIndex].stockPriceData.price
+                                                isSellingEnabled = mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex] > 0
+
+                                                wonValue = 0
+                                                stockValue = 0
+                                                      },
                                             shape = MaterialTheme.shapes.medium,
                                             colors = ButtonDefaults.buttonColors(
                                                 containerColor = MaterialTheme.colorScheme.primary,
