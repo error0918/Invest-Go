@@ -19,7 +19,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = 0.03f,
                         price = 1300f,
-                        trendChangeRate = 0.003f,
+                        trendChangeRate = 0.0003f,
                         priceChangeRate = 0.003f
                     )
                 ),
@@ -28,7 +28,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.02f,
                         price = 180f,
-                        trendChangeRate = 0.005f,
+                        trendChangeRate = 0.0005f,
                         priceChangeRate = 0.005f
                     )
                 ),
@@ -37,7 +37,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.01f,
                         price = 9.6f,
-                        trendChangeRate = 0.001f,
+                        trendChangeRate = 0.0001f,
                         priceChangeRate = 0.005f
                     )
                 ),
@@ -46,7 +46,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = 0f,
                         price = 1350f,
-                        trendChangeRate = 0.0005f,
+                        trendChangeRate = 0.00005f,
                         priceChangeRate = 0.005f
                     )
                 ),
@@ -55,7 +55,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.01f,
                         price = 1600f,
-                        trendChangeRate = 0.0005f,
+                        trendChangeRate = 0.00005f,
                         priceChangeRate = 0.01f
                     )
                 ),
@@ -64,7 +64,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = 0.03f,
                         price = 1300f,
-                        trendChangeRate = 0.0005f,
+                        trendChangeRate = 0.00005f,
                         priceChangeRate = 0.005f
                     )
                 ),
@@ -73,7 +73,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.03f,
                         price = 15f,
-                        trendChangeRate = 0.001f,
+                        trendChangeRate = 0.0001f,
                         priceChangeRate = 0.005f
                     )
                 )
@@ -89,7 +89,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = 0.02f,
                         price = 1800f,
-                        trendChangeRate = 0.0001f,
+                        trendChangeRate = 0.00001f,
                         priceChangeRate = 0.0001f
                     )
                 ),
@@ -98,7 +98,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = 0.01f,
                         price = 24f,
-                        trendChangeRate = 0.003f,
+                        trendChangeRate = 0.0003f,
                         priceChangeRate = 0.003f
                     )
                 ),
@@ -107,7 +107,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = 0f,
                         price = 5000f,
-                        trendChangeRate = 0.05f,
+                        trendChangeRate = 0.005f,
                         priceChangeRate = 0.003f
                     )
                 ),
@@ -116,7 +116,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = 0.05f,
                         price = 1035f,
-                        trendChangeRate = 0.005f,
+                        trendChangeRate = 0.0005f,
                         priceChangeRate = 0.01f
                     )
                 ),
@@ -125,7 +125,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.01f,
                         price = 1600f,
-                        trendChangeRate = 0.0005f,
+                        trendChangeRate = 0.00005f,
                         priceChangeRate = 0.01f
                     )
                 ),
@@ -134,7 +134,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = 0f,
                         price = 10270f,
-                        trendChangeRate = 0.05f,
+                        trendChangeRate = 0.005f,
                         priceChangeRate = 0.03f
                     )
                 )
@@ -150,7 +150,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = 0f,
                         price = 58000f,
-                        trendChangeRate = 0.05f,
+                        trendChangeRate = 0.005f,
                         priceChangeRate = 0.02f
                     )
                 ),
@@ -159,7 +159,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.01f,
                         price = 88000f,
-                        trendChangeRate = 0.03f,
+                        trendChangeRate = 0.003f,
                         priceChangeRate = 0.03f
                     )
                 ),
@@ -168,7 +168,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.03f,
                         price = 15800f,
-                        trendChangeRate = 0.02f,
+                        trendChangeRate = 0.002f,
                         priceChangeRate = 0.04f
                     )
                 ),
@@ -177,7 +177,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.03f,
                         price = 77000f,
-                        trendChangeRate = 0.02f,
+                        trendChangeRate = 0.002f,
                         priceChangeRate = 0.07f
                     )
                 ),
@@ -186,7 +186,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.01f,
                         price = 17500f,
-                        trendChangeRate = 0.02f,
+                        trendChangeRate = 0.002f,
                         priceChangeRate = 0.02f
                     )
                 ),
@@ -195,7 +195,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.02f,
                         price = 15300f,
-                        trendChangeRate = 0.02f,
+                        trendChangeRate = 0.002f,
                         priceChangeRate = 0.01f
                     )
                 ),
@@ -204,7 +204,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = 0.005f,
                         price = 5300f,
-                        trendChangeRate = 0.01f,
+                        trendChangeRate = 0.001f,
                         priceChangeRate = 0.04f
                     )
                 ),
@@ -213,7 +213,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = 0f,
                         price = 8900f,
-                        trendChangeRate = 0.005f,
+                        trendChangeRate = 0.0005f,
                         priceChangeRate = 0.01f
                     )
                 )
@@ -229,7 +229,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = 0f,
                         price = 17000f,
-                        trendChangeRate = 0.05f,
+                        trendChangeRate = 0.005f,
                         priceChangeRate = 0.03f
                     )
                 ),
@@ -238,7 +238,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.02f,
                         price = 31200f,
-                        trendChangeRate = 0.04f,
+                        trendChangeRate = 0.004f,
                         priceChangeRate = 0.04f
                     )
                 ),
@@ -247,7 +247,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.03f,
                         price = 10000f,
-                        trendChangeRate = 0.06f,
+                        trendChangeRate = 0.006f,
                         priceChangeRate = 0.03f
                     )
                 ),
@@ -256,7 +256,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = 0.01f,
                         price = 19500f,
-                        trendChangeRate = 0.06f,
+                        trendChangeRate = 0.006f,
                         priceChangeRate = 0.02f
                     )
                 ),
@@ -265,7 +265,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.02f,
                         price = 15300f,
-                        trendChangeRate = 0.02f,
+                        trendChangeRate = 0.002f,
                         priceChangeRate = 0.01f
                     )
                 ),
@@ -274,7 +274,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = 0.02f,
                         price = 30900f,
-                        trendChangeRate = 0.02f,
+                        trendChangeRate = 0.002f,
                         priceChangeRate = 0.06f
                     )
                 )
@@ -290,7 +290,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.01f,
                         price = 21900f,
-                        trendChangeRate = 0.05f,
+                        trendChangeRate = 0.005f,
                         priceChangeRate = 0.06f
                     )
                 ),
@@ -299,7 +299,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.04f,
                         price = 45f,
-                        trendChangeRate = 0.07f,
+                        trendChangeRate = 0.007f,
                         priceChangeRate = 0.04f
                     )
                 ),
@@ -308,7 +308,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.02f,
                         price = 1500f,
-                        trendChangeRate = 0.03f,
+                        trendChangeRate = 0.003f,
                         priceChangeRate = 0.05f
                     )
                 ),
@@ -317,7 +317,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = 0f,
                         price = 10f,
-                        trendChangeRate = 0.08f,
+                        trendChangeRate = 0.008f,
                         priceChangeRate = 0.06f
                     )
                 ),
@@ -326,7 +326,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.05f,
                         price = 0.2f,
-                        trendChangeRate = 0.03f,
+                        trendChangeRate = 0.003f,
                         priceChangeRate = 0.07f
                     )
                 ),
@@ -335,7 +335,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.02f,
                         price = 56f,
-                        trendChangeRate = 0.03f,
+                        trendChangeRate = 0.003f,
                         priceChangeRate = 0.03f
                     )
                 )
@@ -351,7 +351,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.2f,
                         price = 100f,
-                        trendChangeRate = 0.3f,
+                        trendChangeRate = 0.03f,
                         priceChangeRate = 0.3f
                     )
                 ),
@@ -360,7 +360,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.3f,
                         price = 200f,
-                        trendChangeRate = 0.5f,
+                        trendChangeRate = 0.05f,
                         priceChangeRate = 0.05f
                     )
                 ),
@@ -369,7 +369,7 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.25f,
                         price = 1100f,
-                        trendChangeRate = 0.05f,
+                        trendChangeRate = 0.005f,
                         priceChangeRate = 0.5f
                     )
                 )

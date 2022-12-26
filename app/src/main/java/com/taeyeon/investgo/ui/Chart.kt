@@ -1,7 +1,5 @@
 package com.taeyeon.investgo.ui
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -29,15 +27,14 @@ import com.taeyeon.investgo.R
 import com.taeyeon.investgo.data.StockData
 import com.taeyeon.investgo.theme.gmarketSans
 import kotlin.math.ceil
-import kotlin.math.roundToInt
 
 @Composable
 fun Chart(
     modifier: Modifier = Modifier,
     icon: ImageVector,
-    stockData: StockData
+    stockData: StockData,
+    toolbarLeftItem: (@Composable () -> Unit)?
 ) {
-    // Additional Stock Data
     var priceRange = stockData.history[0] .. stockData.history[0]
     stockData.history.forEach {
         if (it < priceRange.start) priceRange = it .. priceRange.endInclusive
@@ -47,10 +44,7 @@ fun Chart(
     val getRate = { price: Float -> (priceRange.endInclusive - price) / (priceRange.endInclusive - priceRange.start) }
     val changeAmount = stockData.history.last() - stockData.history[if (stockData.history.size == 0) 0 else stockData.history.size - 2]
 
-
-    // Composable Variable
     var interval by rememberSaveable { mutableStateOf(1f) }
-    var autoScroll by rememberSaveable { mutableStateOf(true) }
 
 
     Surface(
@@ -85,41 +79,13 @@ fun Chart(
                     .fillMaxWidth()
                     .height(32.dp)
             ) {
-
-                Row(
+                Box(
                     modifier = Modifier
-                        .height(24.dp)
-                        .align(Alignment.CenterStart),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .align(Alignment.CenterStart)
                 ) {
-                    Text(
-                        text = "1초",
-                        fontSize = LocalDensity.current.run { 24.dp.toSp() },
-                        fontFamily = gmarketSans
-                    )
-                    Switch(
-                        checked = interval == 10f,
-                        onCheckedChange = {
-                            interval = if (interval == 1f) 10f else 1f
-                        },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = LocalContentColor.current,
-                            checkedTrackColor = LocalContentColor.current.copy(alpha = 0.5f),
-                            checkedBorderColor = LocalContentColor.current.copy(alpha = 0.5f),
-                            checkedIconColor = LocalContentColor.current,
-                            uncheckedThumbColor = LocalContentColor.current,
-                            uncheckedTrackColor = LocalContentColor.current.copy(alpha = 0.5f),
-                            uncheckedBorderColor = LocalContentColor.current.copy(alpha = 0.5f),
-                            uncheckedIconColor = LocalContentColor.current,
-                        ),
-                        modifier = Modifier.height(24.dp)
-                    )
-                    Text(
-                        text = "10초",
-                        fontSize = LocalDensity.current.run { 24.dp.toSp() },
-                        fontFamily = gmarketSans
-                    )
+                    toolbarLeftItem?.let {
+                        it()
+                    }
                 }
 
                 Row(
@@ -145,19 +111,36 @@ fun Chart(
 
                 Row(
                     modifier = Modifier
-                        .height(24.dp)
+                        .height(12.dp)
                         .align(Alignment.CenterEnd),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Text(
+                        text = "1초",
+                        fontSize = LocalDensity.current.run { 12.dp.toSp() },
+                        fontFamily = gmarketSans
+                    )
                     Switch(
-                        checked = autoScroll,
-                        onCheckedChange = { autoScroll = it },
-                        modifier = Modifier.height(24.dp)
+                        checked = interval == 10f,
+                        onCheckedChange = {
+                            interval = if (interval == 1f) 10f else 1f
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = LocalContentColor.current,
+                            checkedTrackColor = LocalContentColor.current.copy(alpha = 0.5f),
+                            checkedBorderColor = LocalContentColor.current.copy(alpha = 0.5f),
+                            checkedIconColor = LocalContentColor.current,
+                            uncheckedThumbColor = LocalContentColor.current,
+                            uncheckedTrackColor = LocalContentColor.current.copy(alpha = 0.5f),
+                            uncheckedBorderColor = LocalContentColor.current.copy(alpha = 0.5f),
+                            uncheckedIconColor = LocalContentColor.current,
+                        ),
+                        modifier = Modifier.height(12.dp)
                     )
                     Text(
-                        text = "자동 스크롤",
-                        fontSize = LocalDensity.current.run { 24.dp.toSp() },
+                        text = "10초",
+                        fontSize = LocalDensity.current.run { 12.dp.toSp() },
                         fontFamily = gmarketSans
                     )
                 }
@@ -187,15 +170,6 @@ fun Chart(
                     (chartSize.width.toDp() - (64.dp + 2.dp)) * 0.1f to chartSize.height.toDp() - (32.dp + 16.dp + 16.dp)
                 }
 
-                val density = LocalDensity.current
-                LaunchedEffect(changeAmount) {
-                    if (autoScroll && scrollState.canScrollForward)
-                        scrollState.animateScrollTo(
-                            value = scrollState.value + density.run { oneBlock.first.toPx() / (interval * 10f) }.roundToInt(),
-                            animationSpec = tween(80, easing = LinearEasing)
-                        )
-                }
-
                 Row(
                     modifier = Modifier
                         .padding(
@@ -204,9 +178,10 @@ fun Chart(
                             bottom = 32.dp + 16.dp
                         )
                         .fillMaxSize()
-                        .horizontalScroll(state = scrollState)
+                        .horizontalScroll(state = scrollState, reverseScrolling = true)
                 ) {
                     val primary = MaterialTheme.colorScheme.primary
+
                     Canvas(
                         modifier = Modifier
                             .width(oneBlock.first * ((stockData.history.size) / (interval * 10) + (if (stockData.history.size >= interval * 100f) 1f else 0.5f)))
@@ -404,7 +379,7 @@ fun Chart(
                     }
                     Row {
                         Text(
-                            text = "추제: ", // TODO
+                            text = "추세: ", // TODO
                             fontSize = LocalDensity.current.run { 16.dp.toSp() },
                             fontFamily = gmarketSans
                         )
@@ -425,7 +400,7 @@ fun Chart(
                     )
 
                     Text(
-                        text = "가격 변동률: ${stockData.stockPriceData.trendChangeRate * 100f}%", // TODO
+                        text = "추세 변동률: ${stockData.stockPriceData.trendChangeRate * 100f}%", // TODO
                         fontSize = LocalDensity.current.run { 16.dp.toSp() },
                         fontFamily = gmarketSans
                     )

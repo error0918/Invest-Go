@@ -1,12 +1,11 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @file:Suppress("OPT_IN_IS_NOT_ENABLED")
 
 package com.taeyeon.investgo.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -37,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.taeyeon.investgo.R
+import com.taeyeon.investgo.model.GameSubScreen
 import com.taeyeon.investgo.model.GameViewModel
 import com.taeyeon.investgo.model.MainViewModel
 import com.taeyeon.investgo.theme.gmarketSans
@@ -161,6 +161,7 @@ fun GameScreen(
                 horizontalArrangement = Arrangement.spacedBy(32.dp)
             ) {
 
+
                 Surface(
                     modifier = Modifier
                         .weight(1f)
@@ -240,7 +241,14 @@ fun GameScreen(
                                                             width = 2.dp,
                                                             color = LocalContentColor.current
                                                         ),
-                                                        onClick = {}
+                                                        onClick = {
+                                                            mainViewModel.gameViewModel.subScreen =
+                                                                if (mainViewModel.gameViewModel.subScreen is GameSubScreen.Chart && (mainViewModel.gameViewModel.subScreen as GameSubScreen.Chart).stockData == stockData) GameSubScreen.Default
+                                                                else GameSubScreen.Chart(
+                                                                    icon = tradeCowData.icon,
+                                                                    stockData = stockData
+                                                                )
+                                                        }
                                                     ) {
                                                         CompositionLocalProvider(
                                                             LocalContentColor provides if (!isSystemInDarkTheme()) Color.DarkGray else Color.LightGray
@@ -390,77 +398,43 @@ fun GameScreen(
                     }
                 }
 
-                Column(
+
+                AnimatedContent(
+                    targetState = mainViewModel.gameViewModel.subScreen,
                     modifier = Modifier
-                        .weight(1f)
+                        .weight(
+                            animateFloatAsState(
+                                targetValue = mainViewModel.gameViewModel.subScreen.fraction * 2f
+                            ).value
+                        )
                         .fillMaxHeight()
                 ) {
-                    var isActionShowing by rememberSaveable { mutableStateOf(false) }
+                    when (it) {
 
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        color = LocalContentColor.current.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(16.dp),
-                        border = BorderStroke(
-                            width = 2.dp,
-                            color = LocalContentColor.current
-                        )
-                    ) {
-                        //
-                    }
+                        GameSubScreen.Default -> {
+                            Column(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                var isActionShowing by rememberSaveable { mutableStateOf(false) }
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                                Surface(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f),
+                                    color = LocalContentColor.current.copy(alpha = 0.2f),
+                                    shape = RoundedCornerShape(16.dp),
+                                    border = BorderStroke(
+                                        width = 2.dp,
+                                        color = LocalContentColor.current
+                                    )
+                                ) {
+                                    //
+                                }
 
-                    Button(
-                        onClick = { isActionShowing = !isActionShowing },
-                        shape = MaterialTheme.shapes.medium,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .alpha(0.6f)
-                    ) {
-                        Icon(
-                            imageVector = if (isActionShowing) Icons.Rounded.KeyboardArrowDown else Icons.Rounded.KeyboardArrowUp,
-                            contentDescription = "집 가고 싶다", // TODO
-                            modifier = Modifier.size(32.dp)
-                        )
-                        Text(
-                            text = if (isActionShowing) "액션 숨기기" else "액션 보이기",
-                            fontSize = with(LocalDensity.current) { 24.dp.toSp() },
-                            fontWeight = FontWeight.Bold
-                        )
-                        Icon(
-                            imageVector = if (isActionShowing) Icons.Rounded.KeyboardArrowDown else Icons.Rounded.KeyboardArrowUp,
-                            contentDescription = "집 가고 싶다", // TODO
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
+                                Spacer(modifier = Modifier.height(32.dp))
 
-                    Spacer(
-                        modifier = Modifier
-                            .height(
-                                animateDpAsState(
-                                    targetValue = if (isActionShowing) 16.dp else 0.dp
-                                ).value
-                            )
-                    )
-
-                    AnimatedVisibility(visible = isActionShowing) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            listOf(
-                                "돈 벌러가기" to { /*TODO*/ },
-                                "모두 판매하기" to {}
-                            ).forEach {
                                 Button(
-                                    onClick = it.second,
+                                    onClick = { isActionShowing = !isActionShowing },
                                     shape = MaterialTheme.shapes.medium,
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = MaterialTheme.colorScheme.primary,
@@ -468,18 +442,102 @@ fun GameScreen(
                                     ),
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .alpha(0.6f)
                                 ) {
+                                    Icon(
+                                        imageVector = if (isActionShowing) Icons.Rounded.KeyboardArrowDown else Icons.Rounded.KeyboardArrowUp,
+                                        contentDescription = "집 가고 싶다", // TODO
+                                        modifier = Modifier.size(32.dp)
+                                    )
                                     Text(
-                                        text = it.first,
-                                        fontSize = with(LocalDensity.current) { 36.dp.toSp() },
+                                        text = if (isActionShowing) "액션 숨기기" else "액션 보이기",
+                                        fontSize = with(LocalDensity.current) { 24.dp.toSp() },
                                         fontWeight = FontWeight.Bold
                                     )
+                                    Icon(
+                                        imageVector = if (isActionShowing) Icons.Rounded.KeyboardArrowDown else Icons.Rounded.KeyboardArrowUp,
+                                        contentDescription = "집 가고 싶다", // TODO
+                                        modifier = Modifier.size(32.dp)
+                                    )
                                 }
+
+                                Spacer(
+                                    modifier = Modifier
+                                        .height(
+                                            animateDpAsState(
+                                                targetValue = if (isActionShowing) 16.dp else 0.dp
+                                            ).value
+                                        )
+                                )
+
+                                AnimatedVisibility(visible = isActionShowing) {
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                                    ) {
+                                        listOf(
+                                            "돈 벌러가기" to { /*TODO*/ },
+                                            "모두 판매하기" to {}
+                                        ).forEach { pair ->
+                                            Button(
+                                                onClick = pair.second,
+                                                shape = MaterialTheme.shapes.medium,
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = MaterialTheme.colorScheme.primary,
+                                                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                                                ),
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                            ) {
+                                                Text(
+                                                    text = pair.first,
+                                                    fontSize = with(LocalDensity.current) { 36.dp.toSp() },
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
                             }
                         }
-                    }
 
+                        is GameSubScreen.Chart -> {
+                            Column(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+
+                                Chart(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(2.5f),
+                                    icon = it.icon,
+                                    stockData = it.stockData,
+                                    toolbarLeftItem = {
+                                        val tint = LocalContentColor.current
+                                        OutlinedButton(
+                                            onClick = { mainViewModel.gameViewModel.subScreen = GameSubScreen.Default },
+                                            shape = CircleShape,
+                                            contentPadding = PaddingValues(2.dp),
+                                            modifier = Modifier.size(24.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Close,
+                                                contentDescription = "닫기", // TODO
+                                                tint = tint
+                                            )
+                                        }
+                                    }
+                                )
+                                
+                                Spacer(modifier = Modifier.weight(1f))
+
+                            }
+                        }
+
+                    }
                 }
+
 
             }
 
