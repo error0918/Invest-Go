@@ -510,7 +510,7 @@ fun GameScreen(
                                 Chart(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .weight(2.5f),
+                                        .weight(3f),
                                     icon = it.icon,
                                     stockData = it.stockData,
                                     toolbarLeftItem = {
@@ -530,18 +530,166 @@ fun GameScreen(
                                     }
                                 )
                                 
-                                Box(
+                                Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .weight(1f),
-                                    contentAlignment = Alignment.Center
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        text = "대충 거래",
-                                        fontFamily = gmarketSans,
-                                        fontSize = LocalDensity.current.run { 64.dp.toSp() },
-                                        fontWeight = FontWeight.Bold
-                                    )
+
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(1.6f)
+                                            .background(
+                                                color = LocalContentColor.current.copy(alpha = 0.05f),
+                                                shape = RoundedCornerShape(8.dp)
+                                            )
+                                            .padding(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            text = "원",
+                                            fontFamily = gmarketSans,
+                                            fontSize = LocalDensity.current.run { 16.dp.toSp() },
+                                            fontWeight = FontWeight.Medium,
+                                            modifier = Modifier.align(Alignment.Start)
+                                        )
+                                        Text(
+                                            text = "돈",
+                                            fontFamily = gmarketSans,
+                                            fontSize = LocalDensity.current.run { 24.dp.toSp() },
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .border(
+                                                    width = 1.dp,
+                                                    color = LocalContentColor.current,
+                                                    shape = RoundedCornerShape(4.dp)
+                                                )
+                                                .padding(
+                                                    vertical = 16.dp,
+                                                    horizontal = 4.dp
+                                                )
+                                        )
+                                        Slider(
+                                            value = 0.4f,
+                                            onValueChange = {},
+                                            valueRange = 0f .. 1f,
+                                            steps = 0,
+                                            onValueChangeFinished = {},
+                                            colors = SliderDefaults.colors(),
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
+
+                                    Column(
+                                        modifier = Modifier.weight(1f),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Button(
+                                            onClick = { /*TODO*/ },
+                                            shape = MaterialTheme.shapes.medium,
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.primary,
+                                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                                            ),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.KeyboardArrowRight,
+                                                contentDescription = "화살표", // TODO
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                            Text(
+                                                text = "구매하기",
+                                                fontSize = with(LocalDensity.current) { 20.dp.toSp() },
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Icon(
+                                                imageVector = Icons.Rounded.KeyboardArrowRight,
+                                                contentDescription = "화살표", // TODO
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        }
+                                        Button(
+                                            onClick = { /*TODO*/ },
+                                            shape = MaterialTheme.shapes.medium,
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.primary,
+                                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                                            ),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.KeyboardArrowLeft,
+                                                contentDescription = "화살표", // TODO
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                            Text(
+                                                text = "판매하기",
+                                                fontSize = with(LocalDensity.current) { 20.dp.toSp() },
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Icon(
+                                                imageVector = Icons.Rounded.KeyboardArrowLeft,
+                                                contentDescription = "화살표", // TODO
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        }
+                                    }
+
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(1.6f)
+                                            .background(
+                                                color = LocalContentColor.current.copy(alpha = 0.05f),
+                                                shape = RoundedCornerShape(8.dp)
+                                            )
+                                            .padding(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            text = it.stockData.name,
+                                            fontFamily = gmarketSans,
+                                            fontSize = LocalDensity.current.run { 16.dp.toSp() },
+                                            fontWeight = FontWeight.Medium,
+                                            modifier = Modifier.align(Alignment.End)
+                                        )
+                                        Text(
+                                            text = "상품량",
+                                            fontFamily = gmarketSans,
+                                            fontSize = LocalDensity.current.run { 24.dp.toSp() },
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .border(
+                                                    width = 1.dp,
+                                                    color = LocalContentColor.current,
+                                                    shape = RoundedCornerShape(4.dp)
+                                                )
+                                                .padding(
+                                                    vertical = 16.dp,
+                                                    horizontal = 4.dp
+                                                )
+                                        )
+                                        Slider(
+                                            value = 0.4f,
+                                            onValueChange = {},
+                                            valueRange = 0f .. 1f,
+                                            steps = 0,
+                                            onValueChangeFinished = {},
+                                            colors = SliderDefaults.colors(),
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
+
                                 }
 
                             }

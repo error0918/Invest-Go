@@ -20,7 +20,7 @@ sealed class GameSubScreen(val fraction: Float = 0.5f) {
     class Chart(
         val icon: ImageVector,
         val stockData: StockData
-    ) : GameSubScreen(fraction = 0.65f)
+    ) : GameSubScreen(fraction = 0.7f)
 }
 
 
