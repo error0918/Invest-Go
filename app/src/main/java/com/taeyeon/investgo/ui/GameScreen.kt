@@ -79,7 +79,6 @@ fun GameScreen(
 
             Row(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                     .constrainAs(toolbar) {
                         top.linkTo(parent.top)
                         width = Dimension.matchParent
