@@ -75,89 +75,88 @@ fun GameScreen(
                 )
                 .padding(32.dp)
         ) {
-            val (menuIconButton, timerText, scoreText1, scoreText2, tradeCowColumn, situationColumn) = createRefs()
+            val (toolbar, tradeCowColumn, situationColumn) = createRefs()
 
-            IconButton(
-                onClick = {
-                    mainViewModel.gameViewModel.isShowingMenu =
-                        !mainViewModel.gameViewModel.isShowingMenu
-                },
+            Row(
                 modifier = Modifier
-                    .size(28.dp)
-                    .constrainAs(menuIconButton) {
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                    .constrainAs(toolbar) {
                         top.linkTo(parent.top)
-                        start.linkTo(parent.start)
-                    }
-                    .border(
-                        width = 2.dp,
-                        color = LocalContentColor.current,
-                        shape = CircleShape
-                    )
+                        width = Dimension.matchParent
+                    },
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.Menu,
-                    contentDescription = "TODO"
+
+                IconButton(
+                    onClick = {
+                        mainViewModel.gameViewModel.isShowingMenu =
+                            !mainViewModel.gameViewModel.isShowingMenu
+                    },
+                    modifier = Modifier
+                        .border(
+                            width = 2.dp,
+                            color = LocalContentColor.current,
+                            shape = CircleShape
+                        )
+                        .size(40.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Menu,
+                        contentDescription = "TODO"
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(32.dp))
+
+                Text(
+                    text = mainViewModel.gameViewModel.remainingVisibleTime,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = LocalDensity.current.run { 24.dp.toSp() },
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier
+                        .width(100.dp)
+                        .border(
+                            width = 2.dp,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .padding(
+                            vertical = 4.dp,
+                            horizontal = 8.dp
+                        )
                 )
+
+                Spacer(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 16.dp)
+                )
+
+                Text(
+                    text = "⌈${mainViewModel.gameViewModel.name}⌋님의 자산: ",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = LocalDensity.current.run { 32.dp.toSp() },
+                    textAlign = TextAlign.End,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+
+                Text(
+                    text = "${mainViewModel.gameViewModel.score}원",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = LocalDensity.current.run { 32.dp.toSp() },
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+
             }
-
-            Text(
-                text = mainViewModel.gameViewModel.remainingVisibleTime,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                fontSize = LocalDensity.current.run { 24.dp.toSp() },
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier
-                    .width(100.dp)
-                    .border(
-                        width = 2.dp,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    .padding(
-                        vertical = 4.dp,
-                        horizontal = 8.dp
-                    )
-                    .constrainAs(timerText) {
-                        top.linkTo(menuIconButton.top)
-                        bottom.linkTo(menuIconButton.bottom)
-                        start.linkTo(menuIconButton.end, margin = 32.dp)
-                    }
-            )
-
-            Text(
-                text = "⌈${mainViewModel.gameViewModel.name}⌋님의 자산: ",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Normal,
-                fontSize = LocalDensity.current.run { 32.dp.toSp() },
-                textAlign = TextAlign.End,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier
-                    .constrainAs(scoreText1) {
-                        centerVerticallyTo(scoreText2)
-                        start.linkTo(timerText.end, margin = 32.dp)
-                        end.linkTo(scoreText2.start)
-                        width = Dimension.fillToConstraints
-                    }
-            )
-
-            Text(
-                text = "${mainViewModel.gameViewModel.score}원",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                fontSize = LocalDensity.current.run { 32.dp.toSp() },
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier
-                    .constrainAs(scoreText2) {
-                        top.linkTo(parent.top)
-                        end.linkTo(parent.end)
-                    }
-            )
 
             Column(
                 modifier = Modifier
                     .constrainAs(tradeCowColumn) {
-                        top.linkTo(menuIconButton.bottom, margin = 32.dp)
+                        top.linkTo(toolbar.bottom, margin = 32.dp)
                         bottom.linkTo(parent.bottom)
                         start.linkTo(parent.start)
                         width = Dimension.percent(0.475f)
@@ -364,7 +363,7 @@ fun GameScreen(
             Column(
                 modifier = Modifier
                     .constrainAs(situationColumn) {
-                        top.linkTo(scoreText2.bottom, margin = 32.dp)
+                        top.linkTo(toolbar.bottom, margin = 32.dp)
                         bottom.linkTo(parent.bottom)
                         end.linkTo(parent.end)
                         width = Dimension.percent(0.475f)
