@@ -16,7 +16,8 @@
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.InvestGo"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape"
+            android:keepScreenOn="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
