@@ -1,5 +1,7 @@
 package com.taeyeon.investgo.util
 
+import java.text.DecimalFormat
+
 fun getDigitNumber(number: Int, digits: Int): String {
     return if (digits > 0) {
         if (number.toString().length >= digits) {
@@ -9,3 +11,5 @@ fun getDigitNumber(number: Int, digits: Int): String {
         }
     } else ""
 }
+
+fun formatPrice(price: Int) = DecimalFormat("###,###").format(price)

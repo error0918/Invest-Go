@@ -14,6 +14,10 @@ import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
 import com.google.accompanist.navigation.animation.AnimatedComposeNavigator
 
+enum class Screen {
+    Welcome, ReadyForGame, Game
+}
+
 class MainViewModel(context: Context) : ViewModel() {
     val navHostController = NavHostController(context).apply {
         navigatorProvider.addNavigator(ComposeNavigator())

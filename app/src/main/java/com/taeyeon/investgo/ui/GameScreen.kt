@@ -20,6 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -35,12 +36,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import com.taeyeon.investgo.R
 import com.taeyeon.investgo.model.GameViewModel
 import com.taeyeon.investgo.model.MainViewModel
 import com.taeyeon.investgo.theme.gmarketSans
+import com.taeyeon.investgo.util.formatPrice
 
 @Composable
 fun GameScreen(
@@ -62,7 +62,7 @@ fun GameScreen(
         contentAlignment = Alignment.Center
     ) {
 
-        ConstraintLayout(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .onSizeChanged { size = it }
@@ -73,16 +73,16 @@ fun GameScreen(
                         else 0.dp
                     ).value
                 )
-                .padding(32.dp)
         ) {
-            val (toolbar, tradeCowColumn, situationColumn) = createRefs()
 
             Row(
                 modifier = Modifier
-                    .constrainAs(toolbar) {
-                        top.linkTo(parent.top)
-                        width = Dimension.matchParent
-                    },
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                    .padding(
+                        vertical = 24.dp,
+                        horizontal = 32.dp
+                    ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
@@ -143,7 +143,7 @@ fun GameScreen(
                 )
 
                 Text(
-                    text = "${mainViewModel.gameViewModel.score}원",
+                    text = "${formatPrice(mainViewModel.gameViewModel.gameData.getScore().toInt())}원",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     fontSize = LocalDensity.current.run { 32.dp.toSp() },
@@ -152,241 +152,321 @@ fun GameScreen(
 
             }
 
-            Column(
-                modifier = Modifier
-                    .constrainAs(tradeCowColumn) {
-                        top.linkTo(toolbar.bottom, margin = 32.dp)
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        width = Dimension.percent(0.475f)
-                        height = Dimension.fillToConstraints
-                    }
-            ) {
-                var expandedIndex by rememberSaveable { mutableStateOf<Int?>(null) }
 
-                for (index in 0 .. 2) {
-                    if (index != 0) Spacer(modifier = Modifier.weight(1f))
-                    AnimatedVisibility(visible = expandedIndex == null || expandedIndex == index) {
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            color = LocalContentColor.current.copy(alpha = 0.6f),
-                            shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(
-                                width = 2.dp,
-                                color = LocalContentColor.current
-                            ),
-                            onClick = { expandedIndex = if (expandedIndex == null) index else null }
-                        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(32.dp),
+                horizontalArrangement = Arrangement.spacedBy(32.dp)
+            ) {
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                ) {
+                    var expandedIndex by rememberSaveable { mutableStateOf<Int?>(null) }
+
+                    for (index in 0..4) {
+                        if (index != 0) Spacer(modifier = Modifier.weight(1f))
+                        AnimatedVisibility(visible = expandedIndex == null || expandedIndex == index) {
                             Surface(
                                 modifier = Modifier
-                                    .padding(16.dp),
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(8.dp),
+                                    .fillMaxWidth(),
+                                color = LocalContentColor.current.copy(alpha = 0.6f),
+                                shape = RoundedCornerShape(16.dp),
+                                border = BorderStroke(
+                                    width = 2.dp,
+                                    color = LocalContentColor.current
+                                ),
+                                onClick = {
+                                    expandedIndex = if (expandedIndex == null) index else null
+                                }
                             ) {
-                                Column(
+                                Surface(
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .animateContentSize()
-                                        .verticalScroll(
-                                            state = rememberScrollState(),
-                                            enabled = expandedIndex != null
-                                        ),
-                                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                                        .padding(16.dp),
+                                    color = Color.Transparent,
+                                    shape = RoundedCornerShape(8.dp),
                                 ) {
-                                    CompositionLocalProvider(
-                                        LocalContentColor provides if (isSystemInDarkTheme()) Color.DarkGray else Color.LightGray
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .animateContentSize()
+                                            .verticalScroll(
+                                                state = rememberScrollState(),
+                                                enabled = expandedIndex != null
+                                            ),
+                                        verticalArrangement = Arrangement.spacedBy(16.dp)
                                     ) {
-
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalAlignment = Alignment.CenterVertically
+                                        CompositionLocalProvider(
+                                            LocalContentColor provides if (isSystemInDarkTheme()) Color.DarkGray else Color.LightGray
                                         ) {
-                                            Icon(
-                                                imageVector = Icons.Rounded.CurrencyBitcoin,
-                                                contentDescription = "집 가고 싶다", // TODO
-                                                modifier = Modifier.size(48.dp)
-                                            )
-                                            Text(
-                                                text = "거래소",
-                                                fontFamily = gmarketSans,
-                                                fontSize = LocalDensity.current.run { 40.dp.toSp() },
-                                                fontWeight = FontWeight.Bold,
-                                                modifier = Modifier.offset(y = 2.dp)
-                                            )
-                                            Spacer(
-                                                modifier = Modifier.weight(1f)
-                                            )
-                                            Icon(
-                                                imageVector = if (expandedIndex != null) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
-                                                contentDescription = "집 가고 싶다", // TODO
-                                                tint = LocalContentColor.current.copy(alpha = 0.5f),
-                                                modifier = Modifier.size(48.dp)
-                                            )
-                                        }
 
-                                        if (expandedIndex != null) {
-                                            for (stockIndex in 0..10) {
-                                                Surface(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth(),
-                                                    color = LocalContentColor.current.copy(alpha = 0.6f),
-                                                    shape = RoundedCornerShape(8.dp),
-                                                    border = BorderStroke(
-                                                        width = 2.dp,
-                                                        color = LocalContentColor.current
-                                                    ),
-                                                    onClick = {}
-                                                ) {
-                                                    CompositionLocalProvider(
-                                                        LocalContentColor provides if (!isSystemInDarkTheme()) Color.DarkGray else Color.LightGray
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Rounded.CurrencyBitcoin,
+                                                    contentDescription = "집 가고 싶다", // TODO
+                                                    modifier = Modifier.size(48.dp)
+                                                )
+                                                Text(
+                                                    text = "거래소",
+                                                    fontFamily = gmarketSans,
+                                                    fontSize = LocalDensity.current.run { 40.dp.toSp() },
+                                                    fontWeight = FontWeight.Bold,
+                                                    modifier = Modifier.offset(y = 2.dp)
+                                                )
+                                                Spacer(
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                                Icon(
+                                                    imageVector = if (expandedIndex != null) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
+                                                    contentDescription = "집 가고 싶다", // TODO
+                                                    tint = LocalContentColor.current.copy(alpha = 0.5f),
+                                                    modifier = Modifier.size(48.dp)
+                                                )
+                                            }
+
+                                            if (expandedIndex != null) {
+                                                for (stockIndex in 0..10) {
+                                                    Surface(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth(),
+                                                        color = LocalContentColor.current.copy(alpha = 0.6f),
+                                                        shape = RoundedCornerShape(8.dp),
+                                                        border = BorderStroke(
+                                                            width = 2.dp,
+                                                            color = LocalContentColor.current
+                                                        ),
+                                                        onClick = {}
                                                     ) {
-                                                        Box(
-                                                            modifier = Modifier
-                                                                .height(80.dp)
-                                                                .padding(16.dp)
+                                                        CompositionLocalProvider(
+                                                            LocalContentColor provides if (!isSystemInDarkTheme()) Color.DarkGray else Color.LightGray
                                                         ) {
-                                                            Text(
-                                                                text = "비트를 쪼개는 코인",
-                                                                fontFamily = gmarketSans,
-                                                                fontSize = LocalDensity.current.run { 20.dp.toSp() },
-                                                                fontWeight = FontWeight.Medium,
-                                                                modifier = Modifier.align(Alignment.CenterStart)
-                                                            )
-                                                            Text(
-                                                                text = "1,000원",
-                                                                fontFamily = gmarketSans,
-                                                                fontSize = LocalDensity.current.run { 20.dp.toSp() },
-                                                                fontWeight = FontWeight.Medium,
-                                                                color = Color.Red,
-                                                                modifier = Modifier.align(Alignment.TopEnd)
-                                                            )
-                                                            Row(
-                                                                modifier = Modifier.align(Alignment.BottomEnd),
-                                                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                                                verticalAlignment = Alignment.CenterVertically
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .height(80.dp)
+                                                                    .padding(16.dp)
                                                             ) {
                                                                 Text(
-                                                                    text = "추세: -0.00129",
+                                                                    text = "비트를 쪼개는 코인",
                                                                     fontFamily = gmarketSans,
-                                                                    fontSize = LocalDensity.current.run { 12.dp.toSp() },
-                                                                    fontWeight = FontWeight.Light,
-                                                                    color = Color.Blue
+                                                                    fontSize = LocalDensity.current.run { 20.dp.toSp() },
+                                                                    fontWeight = FontWeight.Medium,
+                                                                    modifier = Modifier.align(
+                                                                        Alignment.CenterStart
+                                                                    )
                                                                 )
                                                                 Text(
-                                                                    text = "가격 변동률: 2%",
+                                                                    text = "1,000원",
                                                                     fontFamily = gmarketSans,
-                                                                    fontSize = LocalDensity.current.run { 12.dp.toSp() },
-                                                                    fontWeight = FontWeight.Light
+                                                                    fontSize = LocalDensity.current.run { 20.dp.toSp() },
+                                                                    fontWeight = FontWeight.Medium,
+                                                                    color = Color.Red,
+                                                                    modifier = Modifier.align(
+                                                                        Alignment.TopEnd
+                                                                    )
                                                                 )
-                                                                Text(
-                                                                    text = "추세 변동률: 1%",
-                                                                    fontFamily = gmarketSans,
-                                                                    fontSize = LocalDensity.current.run { 12.dp.toSp() },
-                                                                    fontWeight = FontWeight.Light
-                                                                )
+                                                                Row(
+                                                                    modifier = Modifier.align(
+                                                                        Alignment.BottomEnd
+                                                                    ),
+                                                                    horizontalArrangement = Arrangement.spacedBy(
+                                                                        4.dp
+                                                                    ),
+                                                                    verticalAlignment = Alignment.CenterVertically
+                                                                ) {
+                                                                    Text(
+                                                                        text = "추세: -0.00129",
+                                                                        fontFamily = gmarketSans,
+                                                                        fontSize = LocalDensity.current.run { 12.dp.toSp() },
+                                                                        fontWeight = FontWeight.Light,
+                                                                        color = Color.Blue
+                                                                    )
+                                                                    Text(
+                                                                        text = "가격 변동률: 2%",
+                                                                        fontFamily = gmarketSans,
+                                                                        fontSize = LocalDensity.current.run { 12.dp.toSp() },
+                                                                        fontWeight = FontWeight.Light
+                                                                    )
+                                                                    Text(
+                                                                        text = "추세 변동률: 1%",
+                                                                        fontFamily = gmarketSans,
+                                                                        fontSize = LocalDensity.current.run { 12.dp.toSp() },
+                                                                        fontWeight = FontWeight.Light
+                                                                    )
+                                                                }
                                                             }
                                                         }
                                                     }
                                                 }
-                                            }
-                                        } else {
-                                            val contentColor = LocalContentColor.current
-                                            Column(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                                            ) {
-                                                for (stockIndex in 0..2) { // Only 3
-                                                    Row(
-                                                        modifier = Modifier.fillMaxWidth(),
-                                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                                        verticalAlignment = Alignment.CenterVertically
-                                                    ) {
-                                                        Text(
-                                                            text = "비트를 쪼개는 코인",
-                                                            fontFamily = gmarketSans,
-                                                            fontSize = LocalDensity.current.run { 10.dp.toSp() },
-                                                            fontWeight = FontWeight.Light
-                                                        )
-                                                        Canvas(
-                                                            modifier = Modifier.weight(1f)
+                                            } else {
+                                                val contentColor = LocalContentColor.current
+                                                Column(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                                ) {
+                                                    for (stockIndex in 0..2) { // Only 3
+                                                        Row(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            horizontalArrangement = Arrangement.spacedBy(
+                                                                4.dp
+                                                            ),
+                                                            verticalAlignment = Alignment.CenterVertically
                                                         ) {
-                                                            drawLine(
-                                                                color = contentColor,
-                                                                start = Offset(x = 0f, y = 0f),
-                                                                end = Offset(x = this.size.width, y = 0f),
-                                                                strokeWidth = 1.dp.toPx(),
-                                                                cap = StrokeCap.Round,
-                                                                pathEffect = PathEffect.dashPathEffect(
-                                                                    floatArrayOf(3f, 3f)
+                                                            Text(
+                                                                text = "비트를 쪼개는 코인",
+                                                                fontFamily = gmarketSans,
+                                                                fontSize = LocalDensity.current.run { 10.dp.toSp() },
+                                                                fontWeight = FontWeight.Light
+                                                            )
+                                                            Canvas(
+                                                                modifier = Modifier.weight(1f)
+                                                            ) {
+                                                                drawLine(
+                                                                    color = contentColor,
+                                                                    start = Offset(x = 0f, y = 0f),
+                                                                    end = Offset(
+                                                                        x = this.size.width,
+                                                                        y = 0f
+                                                                    ),
+                                                                    strokeWidth = 1.dp.toPx(),
+                                                                    cap = StrokeCap.Round,
+                                                                    pathEffect = PathEffect.dashPathEffect(
+                                                                        floatArrayOf(3f, 3f)
+                                                                    )
                                                                 )
+                                                            }
+                                                            Text(
+                                                                text = "1,000원",
+                                                                fontFamily = gmarketSans,
+                                                                fontSize = LocalDensity.current.run { 10.dp.toSp() },
+                                                                fontWeight = FontWeight.Medium,
+                                                                color = Color.Red
                                                             )
                                                         }
-                                                        Text(
-                                                            text = "1,000원",
-                                                            fontFamily = gmarketSans,
-                                                            fontSize = LocalDensity.current.run { 10.dp.toSp() },
-                                                            fontWeight = FontWeight.Medium,
-                                                            color = Color.Red
+                                                    }
+                                                }
+                                                Canvas(
+                                                    modifier = Modifier
+                                                        .width(3.dp)
+                                                        .height(12.dp)
+                                                        .align(Alignment.CenterHorizontally)
+                                                ) {
+                                                    for (drawIndex in 0..2) {
+                                                        drawCircle(
+                                                            color = contentColor.copy(alpha = 0.5f),
+                                                            radius = 1.5f.dp.toPx(),
+                                                            center = Offset(
+                                                                x = 1.5f.dp.toPx(),
+                                                                y = (1.5f + drawIndex * 4.5f).dp.toPx()
+                                                            ),
                                                         )
                                                     }
                                                 }
                                             }
-                                            Canvas(
-                                                modifier = Modifier
-                                                    .width(3.dp)
-                                                    .height(12.dp)
-                                                    .align(Alignment.CenterHorizontally)
-                                            ) {
-                                                for (drawIndex in 0..2) {
-                                                    drawCircle(
-                                                        color = contentColor.copy(alpha = 0.5f),
-                                                        radius = 1.5f.dp.toPx(),
-                                                        center = Offset(
-                                                            x = 1.5f.dp.toPx(),
-                                                            y = (1.5f + drawIndex * 4.5f).dp.toPx()
-                                                        ),
-                                                    )
-                                                }
-                                            }
-                                        }
 
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            Column(
-                modifier = Modifier
-                    .constrainAs(situationColumn) {
-                        top.linkTo(toolbar.bottom, margin = 32.dp)
-                        bottom.linkTo(parent.bottom)
-                        end.linkTo(parent.end)
-                        width = Dimension.percent(0.475f)
-                        height = Dimension.fillToConstraints
-                    },
-                verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Bottom)
-            ) {
-
-                // TODO
-                Button(
-                    onClick = { /*TODO*/ },
-                    shape = MaterialTheme.shapes.medium,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                    ),
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .weight(1f)
+                        .fillMaxHeight()
                 ) {
-                    Text(
-                        text = "자산 모두 판매하기",
-                        fontSize = with(LocalDensity.current) { 40.dp.toSp() },
-                        fontWeight = FontWeight.Bold
+                    var isActionShowing by rememberSaveable { mutableStateOf(false) }
+
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        color = LocalContentColor.current.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(
+                            width = 2.dp,
+                            color = LocalContentColor.current
+                        )
+                    ) {
+                        //
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Button(
+                        onClick = { isActionShowing = !isActionShowing },
+                        shape = MaterialTheme.shapes.medium,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .alpha(0.6f)
+                    ) {
+                        Icon(
+                            imageVector = if (isActionShowing) Icons.Rounded.KeyboardArrowDown else Icons.Rounded.KeyboardArrowUp,
+                            contentDescription = "집 가고 싶다", // TODO
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Text(
+                            text = if (isActionShowing) "액션 숨기기" else "액션 보이기",
+                            fontSize = with(LocalDensity.current) { 24.dp.toSp() },
+                            fontWeight = FontWeight.Bold
+                        )
+                        Icon(
+                            imageVector = if (isActionShowing) Icons.Rounded.KeyboardArrowDown else Icons.Rounded.KeyboardArrowUp,
+                            contentDescription = "집 가고 싶다", // TODO
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+
+                    Spacer(
+                        modifier = Modifier
+                            .height(
+                                animateDpAsState(
+                                    targetValue = if (isActionShowing) 16.dp else 0.dp
+                                ).value
+                            )
                     )
+
+                    AnimatedVisibility(visible = isActionShowing) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            listOf(
+                                "돈 벌러가기" to { /*TODO*/ },
+                                "모두 판매하기" to {}
+                            ).forEach {
+                                Button(
+                                    onClick = it.second,
+                                    shape = MaterialTheme.shapes.medium,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                                    ),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = it.first,
+                                        fontSize = with(LocalDensity.current) { 36.dp.toSp() },
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                 }
 
             }

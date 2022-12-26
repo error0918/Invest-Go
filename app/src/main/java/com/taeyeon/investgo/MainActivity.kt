@@ -42,10 +42,10 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
-import com.taeyeon.investgo.data.Screen
 import com.taeyeon.investgo.data.StockData
 import com.taeyeon.investgo.data.StockPriceData
 import com.taeyeon.investgo.model.MainViewModel
+import com.taeyeon.investgo.model.Screen
 import com.taeyeon.investgo.theme.InvestGoTheme
 import com.taeyeon.investgo.theme.gmarketSans
 import com.taeyeon.investgo.ui.GameScreen
@@ -203,7 +203,6 @@ fun Test(
     val stockData by remember {
         mutableStateOf(
             StockData(
-                icon = Icons.Rounded.CurrencyBitcoin,
                 name = "이둬뤼움 (\\)",
                 stockPriceData = StockPriceData(
                     trend = 0.02f,
@@ -322,14 +321,14 @@ fun Test(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        stockData.icon?.let {
+                        /*stockData.icon?.let {
                             Icon(
                                 imageVector = it,
                                 contentDescription = stockData.name,
                                 modifier = Modifier
                                     .size(32.dp)
                             )
-                        }
+                        }*/
                         Text(
                             text = stockData.name, // TODO
                             fontSize = LocalDensity.current.run { 32.dp.toSp() },

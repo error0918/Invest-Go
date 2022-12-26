@@ -28,8 +28,8 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.taeyeon.investgo.R
-import com.taeyeon.investgo.data.Screen
 import com.taeyeon.investgo.model.MainViewModel
+import com.taeyeon.investgo.model.Screen
 import com.taeyeon.investgo.theme.gmarketSans
 import com.taeyeon.investgo.util.getDigitNumber
 import com.taeyeon.investgo.util.spinningGradientBackground

@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.taeyeon.investgo.data.GameData
 import com.taeyeon.investgo.data.Settings
 import com.taeyeon.investgo.ui.getRandomName
 import com.taeyeon.investgo.util.getDigitNumber
@@ -23,8 +24,7 @@ class GameViewModel(
 
     var remainingVisibleTime by mutableStateOf("${getDigitNumber(remainingSeconds / 60, 2)}:${getDigitNumber(remainingSeconds % 60, 2)}")
 
-    var score by mutableStateOf(Settings.DEFAULT_MONEY)
-    var won by mutableStateOf(Settings.DEFAULT_MONEY)
+    var gameData by mutableStateOf(GameData())
 
     var isShowingMenu by mutableStateOf(false)
 

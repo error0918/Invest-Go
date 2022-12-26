@@ -26,9 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.taeyeon.investgo.R
-import com.taeyeon.investgo.data.Screen
 import com.taeyeon.investgo.data.Settings
 import com.taeyeon.investgo.model.MainViewModel
+import com.taeyeon.investgo.model.Screen
 import com.taeyeon.investgo.util.spinningGradientBackground
 
 @Composable
