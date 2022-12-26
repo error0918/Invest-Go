@@ -174,7 +174,7 @@ fun GameScreen(
                             .verticalScroll(state = rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(32.dp)
                     ) {
-                        mainViewModel.gameViewModel.gameData.marketData.forEach { tradeCowData ->
+                        mainViewModel.gameViewModel.gameData.marketData.forEachIndexed { tradeCowIndex, tradeCowData ->
                             var isExpanded by rememberSaveable { mutableStateOf(false) }
 
                             Surface(
@@ -232,7 +232,7 @@ fun GameScreen(
 
                                             if (isExpanded) {
 
-                                                tradeCowData.stockDataList.forEach { stockData ->
+                                                tradeCowData.stockDataList.forEachIndexed { stockDataIndex, stockData ->
                                                     Surface(
                                                         modifier = Modifier.fillMaxWidth(),
                                                         color = LocalContentColor.current.copy(alpha = 0.6f),
@@ -243,10 +243,14 @@ fun GameScreen(
                                                         ),
                                                         onClick = {
                                                             mainViewModel.gameViewModel.subScreen =
-                                                                if (mainViewModel.gameViewModel.subScreen is GameSubScreen.Chart && (mainViewModel.gameViewModel.subScreen as GameSubScreen.Chart).stockData == stockData) GameSubScreen.Default
+                                                                if (
+                                                                    mainViewModel.gameViewModel.subScreen is GameSubScreen.Chart &&
+                                                                    (mainViewModel.gameViewModel.subScreen as GameSubScreen.Chart).tradeCowIndex == tradeCowIndex &&
+                                                                    (mainViewModel.gameViewModel.subScreen as GameSubScreen.Chart).stockDataIndex == stockDataIndex
+                                                                ) GameSubScreen.Default
                                                                 else GameSubScreen.Chart(
-                                                                    icon = tradeCowData.icon,
-                                                                    stockData = stockData
+                                                                    tradeCowIndex = tradeCowIndex,
+                                                                    stockDataIndex = stockDataIndex
                                                                 )
                                                         }
                                                     ) {
@@ -408,8 +412,8 @@ fun GameScreen(
                             ).value
                         )
                         .fillMaxHeight()
-                ) {
-                    when (it) {
+                ) { screen ->
+                    when (screen) {
 
                         GameSubScreen.Default -> {
                             Column(
@@ -503,6 +507,9 @@ fun GameScreen(
                         }
 
                         is GameSubScreen.Chart -> {
+                            val tradeCowIndex = screen.tradeCowIndex
+                            val stockDataIndex = screen.stockDataIndex
+
                             Column(
                                 modifier = Modifier.fillMaxSize()
                             ) {
@@ -511,8 +518,8 @@ fun GameScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .weight(3f),
-                                    icon = it.icon,
-                                    stockData = it.stockData,
+                                    icon = mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].icon,
+                                    stockData = mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].stockDataList[stockDataIndex],
                                     toolbarLeftItem = {
                                         val tint = LocalContentColor.current
                                         OutlinedButton(
@@ -537,6 +544,17 @@ fun GameScreen(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
+                                    val price = mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].stockDataList[stockDataIndex].stockPriceData.price
+                                    val won = mainViewModel.gameViewModel.gameData.won
+
+                                    val isBuyingAble = mainViewModel.gameViewModel.gameData.won >= mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].stockDataList[stockDataIndex].stockPriceData.price
+                                    var isBuyingEnabled by rememberSaveable { mutableStateOf(isBuyingAble) }
+                                    val isSellingAble = mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex] > 0
+                                    var isSellingEnabled by rememberSaveable { mutableStateOf(isSellingAble) }
+
+                                    var wonValue by rememberSaveable { mutableStateOf(0) }
+                                    var stockValue by rememberSaveable { mutableStateOf(0) }
+
 
                                     Column(
                                         modifier = Modifier
@@ -549,6 +567,8 @@ fun GameScreen(
                                         verticalArrangement = Arrangement.spacedBy(8.dp),
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
+                                        val steps = (won / price).toInt()
+
                                         Text(
                                             text = "원",
                                             fontFamily = gmarketSans,
@@ -557,7 +577,7 @@ fun GameScreen(
                                             modifier = Modifier.align(Alignment.Start)
                                         )
                                         Text(
-                                            text = "돈",
+                                            text = "${price * wonValue}",
                                             fontFamily = gmarketSans,
                                             fontSize = LocalDensity.current.run { 24.dp.toSp() },
                                             fontWeight = FontWeight.Bold,
@@ -574,15 +594,43 @@ fun GameScreen(
                                                     horizontal = 4.dp
                                                 )
                                         )
-                                        Slider(
-                                            value = 0.4f,
-                                            onValueChange = {},
-                                            valueRange = 0f .. 1f,
-                                            steps = 0,
-                                            onValueChangeFinished = {},
-                                            colors = SliderDefaults.colors(),
-                                            modifier = Modifier.fillMaxWidth()
-                                        )
+                                        if (isBuyingAble) {
+                                            Slider(
+                                                value = wonValue.toFloat(),
+                                                onValueChange = {
+                                                    isBuyingEnabled = true
+                                                    isSellingEnabled = false
+                                                    wonValue = it.toInt()
+                                                },
+                                                valueRange = 0f .. steps.toFloat(),
+                                                steps = steps,
+                                                colors = if (isBuyingEnabled) SliderDefaults.colors(
+                                                    thumbColor = MaterialTheme.colorScheme.primary,
+                                                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                                                    activeTickColor = MaterialTheme.colorScheme.primary,
+                                                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                    inactiveTickColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                    disabledThumbColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledActiveTrackColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledActiveTickColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledInactiveTrackColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledInactiveTickColor = MaterialTheme.colorScheme.onSurface
+                                                )
+                                                else SliderDefaults.colors(
+                                                    thumbColor = MaterialTheme.colorScheme.onSurface,
+                                                    activeTrackColor = MaterialTheme.colorScheme.onSurface,
+                                                    activeTickColor = MaterialTheme.colorScheme.onSurface,
+                                                    inactiveTrackColor = MaterialTheme.colorScheme.onSurface,
+                                                    inactiveTickColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledThumbColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledActiveTrackColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledActiveTickColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledInactiveTrackColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledInactiveTickColor = MaterialTheme.colorScheme.onSurface
+                                                ),
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        }
                                     }
 
                                     Column(
@@ -596,6 +644,7 @@ fun GameScreen(
                                                 containerColor = MaterialTheme.colorScheme.primary,
                                                 contentColor = MaterialTheme.colorScheme.onPrimary,
                                             ),
+                                            enabled = isBuyingAble && isBuyingEnabled,
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                         ) {
@@ -622,6 +671,7 @@ fun GameScreen(
                                                 containerColor = MaterialTheme.colorScheme.primary,
                                                 contentColor = MaterialTheme.colorScheme.onPrimary,
                                             ),
+                                            enabled = isSellingAble && isSellingEnabled,
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                         ) {
@@ -654,15 +704,17 @@ fun GameScreen(
                                         verticalArrangement = Arrangement.spacedBy(8.dp),
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
+                                        val stockNumber = mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex]
+
                                         Text(
-                                            text = it.stockData.name,
+                                            text = mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].stockDataList[stockDataIndex].name,
                                             fontFamily = gmarketSans,
                                             fontSize = LocalDensity.current.run { 16.dp.toSp() },
                                             fontWeight = FontWeight.Medium,
                                             modifier = Modifier.align(Alignment.End)
                                         )
                                         Text(
-                                            text = "상품량",
+                                            text = stockValue.toString(),
                                             fontFamily = gmarketSans,
                                             fontSize = LocalDensity.current.run { 24.dp.toSp() },
                                             fontWeight = FontWeight.Bold,
@@ -679,15 +731,43 @@ fun GameScreen(
                                                     horizontal = 4.dp
                                                 )
                                         )
-                                        Slider(
-                                            value = 0.4f,
-                                            onValueChange = {},
-                                            valueRange = 0f .. 1f,
-                                            steps = 0,
-                                            onValueChangeFinished = {},
-                                            colors = SliderDefaults.colors(),
-                                            modifier = Modifier.fillMaxWidth()
-                                        )
+                                        if (isSellingAble) {
+                                            Slider(
+                                                value = stockValue.toFloat(),
+                                                onValueChange = {
+                                                    isSellingEnabled = true
+                                                    isBuyingEnabled = false
+                                                    stockValue = it.toInt()
+                                                },
+                                                valueRange = 0f .. stockNumber.toFloat(),
+                                                steps = stockNumber,
+                                                colors = if (isSellingEnabled) SliderDefaults.colors(
+                                                    thumbColor = MaterialTheme.colorScheme.primary,
+                                                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                                                    activeTickColor = MaterialTheme.colorScheme.primary,
+                                                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                    inactiveTickColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                    disabledThumbColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledActiveTrackColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledActiveTickColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledInactiveTrackColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledInactiveTickColor = MaterialTheme.colorScheme.onSurface
+                                                )
+                                                else SliderDefaults.colors(
+                                                    thumbColor = MaterialTheme.colorScheme.onSurface,
+                                                    activeTrackColor = MaterialTheme.colorScheme.onSurface,
+                                                    activeTickColor = MaterialTheme.colorScheme.onSurface,
+                                                    inactiveTrackColor = MaterialTheme.colorScheme.onSurface,
+                                                    inactiveTickColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledThumbColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledActiveTrackColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledActiveTickColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledInactiveTrackColor = MaterialTheme.colorScheme.onSurface,
+                                                    disabledInactiveTickColor = MaterialTheme.colorScheme.onSurface
+                                                ),
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        }
                                     }
 
                                 }

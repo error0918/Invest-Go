@@ -3,10 +3,8 @@ package com.taeyeon.investgo.model
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
 import com.taeyeon.investgo.data.GameData
-import com.taeyeon.investgo.data.StockData
 import com.taeyeon.investgo.ui.getRandomName
 import com.taeyeon.investgo.util.getDigitNumber
 import kotlinx.coroutines.CoroutineScope
@@ -18,8 +16,8 @@ import kotlinx.coroutines.launch
 sealed class GameSubScreen(val fraction: Float = 0.5f) {
     object Default : GameSubScreen()
     class Chart(
-        val icon: ImageVector,
-        val stockData: StockData
+        val tradeCowIndex: Int,
+        val stockDataIndex: Int
     ) : GameSubScreen(fraction = 0.7f)
 }
 
