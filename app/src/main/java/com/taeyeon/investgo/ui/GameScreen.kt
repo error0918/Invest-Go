@@ -161,28 +161,30 @@ fun GameScreen(
                 horizontalArrangement = Arrangement.spacedBy(32.dp)
             ) {
 
-                Column(
+                Surface(
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxHeight()
+                        .fillMaxHeight(),
+                    color = Color.Transparent,
+                    shape = RoundedCornerShape(8.dp),
                 ) {
-                    var expandedIndex by rememberSaveable { mutableStateOf<Int?>(null) }
+                    Column(
+                        modifier = Modifier
+                            .verticalScroll(state = rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(32.dp)
+                    ) {
+                        mainViewModel.gameViewModel.gameData.marketData.forEach { tradeCowData ->
+                            var isExpanded by rememberSaveable { mutableStateOf(false) }
 
-                    for (index in 0..4) {
-                        if (index != 0) Spacer(modifier = Modifier.weight(1f))
-                        AnimatedVisibility(visible = expandedIndex == null || expandedIndex == index) {
                             Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth(),
                                 color = LocalContentColor.current.copy(alpha = 0.6f),
                                 shape = RoundedCornerShape(16.dp),
                                 border = BorderStroke(
                                     width = 2.dp,
                                     color = LocalContentColor.current
                                 ),
-                                onClick = {
-                                    expandedIndex = if (expandedIndex == null) index else null
-                                }
+                                onClick = { isExpanded = !isExpanded }
                             ) {
                                 Surface(
                                     modifier = Modifier
@@ -193,11 +195,7 @@ fun GameScreen(
                                     Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .animateContentSize()
-                                            .verticalScroll(
-                                                state = rememberScrollState(),
-                                                enabled = expandedIndex != null
-                                            ),
+                                            .animateContentSize(),
                                         verticalArrangement = Arrangement.spacedBy(16.dp)
                                     ) {
                                         CompositionLocalProvider(
@@ -209,12 +207,12 @@ fun GameScreen(
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
                                                 Icon(
-                                                    imageVector = Icons.Rounded.CurrencyBitcoin,
-                                                    contentDescription = "집 가고 싶다", // TODO
+                                                    imageVector = tradeCowData.icon,
+                                                    contentDescription = tradeCowData.name,
                                                     modifier = Modifier.size(48.dp)
                                                 )
                                                 Text(
-                                                    text = "거래소",
+                                                    text = tradeCowData.name,
                                                     fontFamily = gmarketSans,
                                                     fontSize = LocalDensity.current.run { 40.dp.toSp() },
                                                     fontWeight = FontWeight.Bold,
@@ -224,18 +222,18 @@ fun GameScreen(
                                                     modifier = Modifier.weight(1f)
                                                 )
                                                 Icon(
-                                                    imageVector = if (expandedIndex != null) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
+                                                    imageVector = if (isExpanded) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
                                                     contentDescription = "집 가고 싶다", // TODO
                                                     tint = LocalContentColor.current.copy(alpha = 0.5f),
                                                     modifier = Modifier.size(48.dp)
                                                 )
                                             }
 
-                                            if (expandedIndex != null) {
-                                                for (stockIndex in 0..10) {
+                                            if (isExpanded) {
+
+                                                tradeCowData.stockDataList.forEach { stockData ->
                                                     Surface(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth(),
+                                                        modifier = Modifier.fillMaxWidth(),
                                                         color = LocalContentColor.current.copy(alpha = 0.6f),
                                                         shape = RoundedCornerShape(8.dp),
                                                         border = BorderStroke(
@@ -253,7 +251,7 @@ fun GameScreen(
                                                                     .padding(16.dp)
                                                             ) {
                                                                 Text(
-                                                                    text = "비트를 쪼개는 코인",
+                                                                    text = stockData.name,
                                                                     fontFamily = gmarketSans,
                                                                     fontSize = LocalDensity.current.run { 20.dp.toSp() },
                                                                     fontWeight = FontWeight.Medium,
@@ -262,11 +260,14 @@ fun GameScreen(
                                                                     )
                                                                 )
                                                                 Text(
-                                                                    text = "1,000원",
+                                                                    text = "${stockData.stockPriceData.price}원",
                                                                     fontFamily = gmarketSans,
                                                                     fontSize = LocalDensity.current.run { 20.dp.toSp() },
                                                                     fontWeight = FontWeight.Medium,
-                                                                    color = Color.Red,
+                                                                    color =
+                                                                        if (stockData.stockPriceData.trend > 0) Color.Red
+                                                                        else if (stockData.stockPriceData.trend < 0) Color.Blue
+                                                                        else LocalContentColor.current,
                                                                     modifier = Modifier.align(
                                                                         Alignment.TopEnd
                                                                     )
@@ -281,20 +282,23 @@ fun GameScreen(
                                                                     verticalAlignment = Alignment.CenterVertically
                                                                 ) {
                                                                     Text(
-                                                                        text = "추세: -0.00129",
+                                                                        text = "추세: ${stockData.stockPriceData.trend}",
                                                                         fontFamily = gmarketSans,
                                                                         fontSize = LocalDensity.current.run { 12.dp.toSp() },
                                                                         fontWeight = FontWeight.Light,
-                                                                        color = Color.Blue
+                                                                        color =
+                                                                            if (stockData.stockPriceData.trend > 0) Color.Red
+                                                                            else if (stockData.stockPriceData.trend < 0) Color.Blue
+                                                                            else LocalContentColor.current
                                                                     )
                                                                     Text(
-                                                                        text = "가격 변동률: 2%",
+                                                                        text = "가격 변동률: ${stockData.stockPriceData.priceChangeRate * 100f}%",
                                                                         fontFamily = gmarketSans,
                                                                         fontSize = LocalDensity.current.run { 12.dp.toSp() },
                                                                         fontWeight = FontWeight.Light
                                                                     )
                                                                     Text(
-                                                                        text = "추세 변동률: 1%",
+                                                                        text = "추세 변동률: ${stockData.stockPriceData.trendChangeRate * 100f}%",
                                                                         fontFamily = gmarketSans,
                                                                         fontSize = LocalDensity.current.run { 12.dp.toSp() },
                                                                         fontWeight = FontWeight.Light
@@ -304,13 +308,15 @@ fun GameScreen(
                                                         }
                                                     }
                                                 }
+
                                             } else {
+
                                                 val contentColor = LocalContentColor.current
                                                 Column(
                                                     modifier = Modifier.fillMaxWidth(),
                                                     verticalArrangement = Arrangement.spacedBy(4.dp)
                                                 ) {
-                                                    for (stockIndex in 0..2) { // Only 3
+                                                    for (stockIndex in 0 until tradeCowData.stockDataList.size.let { if (it > 3) 3 else it }) { // Only 3
                                                         Row(
                                                             modifier = Modifier.fillMaxWidth(),
                                                             horizontalArrangement = Arrangement.spacedBy(
@@ -319,7 +325,7 @@ fun GameScreen(
                                                             verticalAlignment = Alignment.CenterVertically
                                                         ) {
                                                             Text(
-                                                                text = "비트를 쪼개는 코인",
+                                                                text = tradeCowData.stockDataList[stockIndex].name,
                                                                 fontFamily = gmarketSans,
                                                                 fontSize = LocalDensity.current.run { 10.dp.toSp() },
                                                                 fontWeight = FontWeight.Light
@@ -342,32 +348,38 @@ fun GameScreen(
                                                                 )
                                                             }
                                                             Text(
-                                                                text = "1,000원",
+                                                                text = "${tradeCowData.stockDataList[stockIndex].stockPriceData.price}원",
                                                                 fontFamily = gmarketSans,
                                                                 fontSize = LocalDensity.current.run { 10.dp.toSp() },
                                                                 fontWeight = FontWeight.Medium,
-                                                                color = Color.Red
+                                                                color =
+                                                                    if (tradeCowData.stockDataList[stockIndex].stockPriceData.trend > 0) Color.Red
+                                                                    else if (tradeCowData.stockDataList[stockIndex].stockPriceData.trend < 0) Color.Blue
+                                                                    else LocalContentColor.current
                                                             )
                                                         }
                                                     }
                                                 }
-                                                Canvas(
-                                                    modifier = Modifier
-                                                        .width(3.dp)
-                                                        .height(12.dp)
-                                                        .align(Alignment.CenterHorizontally)
-                                                ) {
-                                                    for (drawIndex in 0..2) {
-                                                        drawCircle(
-                                                            color = contentColor.copy(alpha = 0.5f),
-                                                            radius = 1.5f.dp.toPx(),
-                                                            center = Offset(
-                                                                x = 1.5f.dp.toPx(),
-                                                                y = (1.5f + drawIndex * 4.5f).dp.toPx()
-                                                            ),
-                                                        )
+                                                if (tradeCowData.stockDataList.size > 3) {
+                                                    Canvas(
+                                                        modifier = Modifier
+                                                            .width(3.dp)
+                                                            .height(12.dp)
+                                                            .align(Alignment.CenterHorizontally)
+                                                    ) {
+                                                        for (drawIndex in 0..2) {
+                                                            drawCircle(
+                                                                color = contentColor.copy(alpha = 0.5f),
+                                                                radius = 1.5f.dp.toPx(),
+                                                                center = Offset(
+                                                                    x = 1.5f.dp.toPx(),
+                                                                    y = (1.5f + drawIndex * 4.5f).dp.toPx()
+                                                                ),
+                                                            )
+                                                        }
                                                     }
                                                 }
+
                                             }
 
                                         }

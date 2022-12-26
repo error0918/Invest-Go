@@ -37,6 +37,12 @@ class GameViewModel(
                     delay(100)
                     count++
 
+                    gameData.marketData.forEach { tradeCowData ->
+                        tradeCowData.stockDataList.forEach { stockData ->
+                            stockData.update()
+                        }
+                    }
+
                     if (count % 10 == 0) {
                         remainingSeconds--
                         remainingVisibleTime = "${getDigitNumber(remainingSeconds / 60, 2)}:${getDigitNumber(remainingSeconds % 60, 2)}"
