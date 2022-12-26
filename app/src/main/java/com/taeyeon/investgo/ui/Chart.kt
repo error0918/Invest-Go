@@ -178,7 +178,10 @@ fun Chart(
                             bottom = 32.dp + 16.dp
                         )
                         .fillMaxSize()
-                        .horizontalScroll(state = scrollState, reverseScrolling = true)
+                        .horizontalScroll(
+                            state = scrollState,
+                            reverseScrolling = true
+                        )
                 ) {
                     val primary = MaterialTheme.colorScheme.primary
 
@@ -226,7 +229,10 @@ fun Chart(
                         .padding(end = 64.dp + 2.dp)
                         .fillMaxWidth()
                         .align(Alignment.BottomCenter)
-                        .horizontalScroll(state = scrollState)
+                        .horizontalScroll(
+                            state = scrollState,
+                            reverseScrolling = true
+                        )
                 ) {
                     for (index in 0 .. (ceil(stockData.history.size / (interval * 10)).toInt())) {
                         Text(
@@ -386,8 +392,8 @@ fun Chart(
                         Text(
                             text = "${stockData.stockPriceData.trend}", // TODO
                             color =
-                            if (changeAmount > 0f) Color.Red
-                            else if (changeAmount < 0f) Color.Blue
+                            if (stockData.stockPriceData.trend > 0f) Color.Red
+                            else if (stockData.stockPriceData.trend < 0f) Color.Blue
                             else Color.Gray,
                             fontSize = LocalDensity.current.run { 16.dp.toSp() },
                             fontFamily = gmarketSans

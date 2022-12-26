@@ -530,7 +530,19 @@ fun GameScreen(
                                     }
                                 )
                                 
-                                Spacer(modifier = Modifier.weight(1f))
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "대충 거래",
+                                        fontFamily = gmarketSans,
+                                        fontSize = LocalDensity.current.run { 64.dp.toSp() },
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
 
                             }
                         }
