@@ -14,18 +14,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Computer
 import androidx.compose.material.icons.rounded.CurrencyBitcoin
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -34,7 +33,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -45,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.taeyeon.investgo.data.Screen
+import com.taeyeon.investgo.data.StockData
+import com.taeyeon.investgo.data.StockPriceData
 import com.taeyeon.investgo.model.MainViewModel
 import com.taeyeon.investgo.theme.InvestGoTheme
 import com.taeyeon.investgo.theme.gmarketSans
@@ -54,7 +54,6 @@ import com.taeyeon.investgo.ui.WelcomeScreen
 import kotlinx.coroutines.delay
 import kotlin.math.ceil
 import kotlin.math.roundToInt
-import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -165,7 +164,9 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
-                    //Test()
+
+                    // Test()
+
                 }
             }
         }
@@ -194,31 +195,6 @@ class MainActivity : ComponentActivity() {
 }
 
 
-data class StockData(
-    val icon: ImageVector? = null,
-    val name: String,
-    val stockPriceData: StockPriceData,
-    val history: SnapshotStateList<Float>
-) {
-    fun update() {
-        history.add(stockPriceData.apply { update() }.price)
-    }
-}
-
-
-data class StockPriceData(
-    var trend: Float,
-    var price: Float,
-    var trendChangeRate: Float,
-    var priceChangeRate: Float
-) {
-    fun update() {
-        trend += (Random.nextFloat() * 2f - 0.996f) * trendChangeRate - trend * 0.01f
-        price *= 1f + (trend + Random.nextFloat() * 2f - 0.996f) * priceChangeRate
-    }
-}
-
-
 @Composable
 fun Test(
     modifier: Modifier = Modifier
@@ -234,11 +210,11 @@ fun Test(
                     price = 600000f,
                     trendChangeRate = 0.003f,
                     priceChangeRate = 0.05f
-                ),
-                history = mutableStateListOf(
-                    600000.1f, 600000f, 600000f, 600000f
                 )
-            )
+            ).apply {
+                update()
+                update()
+            }
         )
     }
     Log.e("PR", "tr: ${stockData.stockPriceData.trend} / pr: ${stockData.stockPriceData.price}")

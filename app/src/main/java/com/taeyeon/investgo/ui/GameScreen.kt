@@ -23,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -164,7 +166,7 @@ fun GameScreen(
             ) {
                 var expandedIndex by rememberSaveable { mutableStateOf<Int?>(null) }
 
-                for (index in 0 .. 3) {
+                for (index in 0 .. 2) {
                     Spacer(modifier = Modifier.weight(1f))
                     AnimatedVisibility(visible = expandedIndex == null || expandedIndex == index) {
                         Surface(
@@ -199,7 +201,7 @@ fun GameScreen(
                                     ) {
 
                                         Row(
-                                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Icon(
@@ -235,33 +237,93 @@ fun GameScreen(
                                                     border = BorderStroke(
                                                         width = 2.dp,
                                                         color = LocalContentColor.current
-                                                    )
+                                                    ),
+                                                    onClick = {}
                                                 ) {
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .height(60.dp)
-                                                            .padding(8.dp)
-                                                    )
+                                                    CompositionLocalProvider(
+                                                        LocalContentColor provides if (!isSystemInDarkTheme()) Color.DarkGray else Color.LightGray
+                                                    ) {
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .height(80.dp)
+                                                                .padding(16.dp)
+                                                        ) {
+                                                            Text(
+                                                                text = "비트를 쪼개는 코인",
+                                                                fontFamily = gmarketSans,
+                                                                fontSize = LocalDensity.current.run { 20.dp.toSp() },
+                                                                fontWeight = FontWeight.Medium,
+                                                                modifier = Modifier.align(Alignment.CenterStart)
+                                                            )
+                                                            Text(
+                                                                text = "1,000원",
+                                                                fontFamily = gmarketSans,
+                                                                fontSize = LocalDensity.current.run { 15.dp.toSp() },
+                                                                fontWeight = FontWeight.Medium,
+                                                                color = Color.Red,
+                                                                modifier = Modifier.align(Alignment.TopEnd)
+                                                            )
+                                                            // TODO
+                                                        }
+                                                    }
                                                 }
                                             }
                                         } else {
-                                            for (stockIndex in 0..2) { // Only 3
-                                                //
-                                            }
                                             val contentColor = LocalContentColor.current
+                                            Column(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
+                                                for (stockIndex in 0..2) { // Only 3
+                                                    Row(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth(),
+                                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        Text(
+                                                            text = "비트를 쪼개는 코인",
+                                                            fontFamily = gmarketSans,
+                                                            fontSize = LocalDensity.current.run { 10.dp.toSp() },
+                                                            fontWeight = FontWeight.Light
+                                                        )
+                                                        Canvas(
+                                                            modifier = Modifier.weight(1f)
+                                                        ) {
+                                                            drawLine(
+                                                                color = contentColor,
+                                                                start = Offset(x = 0f, y = 0f),
+                                                                end = Offset(x = this.size.width, y = 0f),
+                                                                strokeWidth = 1.dp.toPx(),
+                                                                cap = StrokeCap.Round,
+                                                                pathEffect = PathEffect.dashPathEffect(
+                                                                    floatArrayOf(3f, 3f)
+                                                                )
+                                                            )
+                                                        }
+                                                        Text(
+                                                            text = "1,000원",
+                                                            fontFamily = gmarketSans,
+                                                            fontSize = LocalDensity.current.run { 10.dp.toSp() },
+                                                            fontWeight = FontWeight.Medium,
+                                                            color = Color.Red
+                                                        )
+                                                    }
+                                                }
+                                            }
                                             Canvas(
                                                 modifier = Modifier
-                                                    .width(4.dp)
-                                                    .height(16.dp)
+                                                    .width(3.dp)
+                                                    .height(12.dp)
                                                     .align(Alignment.CenterHorizontally)
                                             ) {
                                                 for (drawIndex in 0..2) {
                                                     drawCircle(
-                                                        color = contentColor,
-                                                        radius = 2.dp.toPx(),
+                                                        color = contentColor.copy(alpha = 0.5f),
+                                                        radius = 1.5f.dp.toPx(),
                                                         center = Offset(
-                                                            x = 2.dp.toPx(),
-                                                            y = (2 + drawIndex * 6).dp.toPx()
+                                                            x = 1.5f.dp.toPx(),
+                                                            y = (1.5f + drawIndex * 4.5f).dp.toPx()
                                                         ),
                                                     )
                                                 }
@@ -276,6 +338,8 @@ fun GameScreen(
                     Spacer(modifier = Modifier.weight(1f))
                 }
             }
+
+            // TODO
 
         }
 
