@@ -49,11 +49,9 @@ fun Chart(
 
 
     Surface(
-        color =
-        if (!isSystemInDarkTheme()) Color.LightGray
+        color = if (!isSystemInDarkTheme()) Color.LightGray
         else Color.DarkGray,
-        contentColor =
-        if (isSystemInDarkTheme()) Color.LightGray
+        contentColor = if (isSystemInDarkTheme()) Color.LightGray
         else Color.DarkGray,
         border = BorderStroke(
             width = 4.dp,
@@ -245,6 +243,7 @@ fun Chart(
                 }
 
                 val contentColor = LocalContentColor.current
+                val secondary = MaterialTheme.colorScheme.secondary
                 Canvas(
                     modifier = Modifier
                         .padding(
@@ -275,8 +274,7 @@ fun Chart(
                         )
                     }
                     drawLine(
-                        color =
-                        if (changeAmount > 0f) Color.Red
+                        color = if (changeAmount > 0f) Color.Red
                         else if (changeAmount < 0f) Color.Blue
                         else Color.Gray,
                         start = Offset(x = 0f, y = size.height * getRate(stockData.history.last())),
@@ -286,6 +284,23 @@ fun Chart(
                         alpha = 0.6f,
                         pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
                     )
+                    averagePurchasePrice?.let {
+                        drawLine(
+                            color = secondary,
+                            start = Offset(
+                                x = 0f,
+                                y = size.height * getRate(averagePurchasePrice)
+                            ),
+                            end = Offset(
+                                x = size.width,
+                                y = size.height * getRate(averagePurchasePrice)
+                            ),
+                            strokeWidth = 2.dp.toPx(),
+                            cap = StrokeCap.Round,
+                            alpha = 0.6f,
+                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
+                        )
+                    }
                 }
 
                 Spacer(
@@ -352,13 +367,41 @@ fun Chart(
                             }
                         )
                         .background(
-                            color =
-                            if (changeAmount > 0f) Color.Red
+                            color = if (changeAmount > 0f) Color.Red
                             else if (changeAmount < 0f) Color.Blue
                             else Color.Gray,
                             shape = RoundedCornerShape(percent = 10)
                         )
                 )
+                averagePurchasePrice?.let {
+                    var averagePurchasePriceTextHeight by remember { mutableStateOf(0) }
+                    Text(
+                        text = "평균구매단가",
+                        maxLines = 1,
+                        color = Color.White,
+                        fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(
+                                top = 4.dp,
+                                bottom = 32.dp + 4.dp,
+                                start = 4.dp,
+                                end = 4.dp
+                            )
+                            .width(64.dp - 8.dp)
+                            .onSizeChanged { averagePurchasePriceTextHeight = it.height }
+                            .align(Alignment.TopEnd)
+                            .offset(
+                                y = LocalDensity.current.run {
+                                    (chartSize.height.toDp() - (32.dp + 4.dp)) * getRate(averagePurchasePrice) - averagePurchasePriceTextHeight.toDp() * 0.5f
+                                }
+                            )
+                            .background(
+                                color = MaterialTheme.colorScheme.secondary,
+                                shape = RoundedCornerShape(percent = 10)
+                            )
+                    )
+                }
 
                 Column(
                     modifier = Modifier

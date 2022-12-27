@@ -1,15 +1,18 @@
 package com.taeyeon.investgo.data
 
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
+
 data class GameData(
     val marketData: List<TradeCowData> = ArrayList(com.taeyeon.investgo.data.marketData),
-    val propertyData: ArrayList<ArrayList<Pair<Int, Float>>> = marketData.let {
-        val outerArrayList = arrayListOf<ArrayList<Pair<Int, Float>>>()
+    val propertyData: SnapshotStateList<SnapshotStateList<Pair<Int, Float>>> = marketData.let {
+        val outerSnapshotStateList = mutableStateListOf<SnapshotStateList<Pair<Int, Float>>>()
         it.forEach { tradeCowData ->
-            val innerArrayList = arrayListOf<Pair<Int, Float>>()
-            for (index in tradeCowData.stockDataList.indices) innerArrayList.add(0 to 0f)
-            outerArrayList.add(innerArrayList)
+            val innerSnapshotStateList = mutableStateListOf<Pair<Int, Float>>()
+            for (index in tradeCowData.stockDataList.indices) innerSnapshotStateList.add(0 to 0f)
+            outerSnapshotStateList.add(innerSnapshotStateList)
         }
-        outerArrayList
+        outerSnapshotStateList
     }, // 개수 to 평균 단가
     var won: Float = Settings.DEFAULT_MONEY
 ) {

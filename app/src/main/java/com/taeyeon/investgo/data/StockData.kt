@@ -191,15 +191,6 @@ val marketData =
                     )
                 ),
                 StockData(
-                    name = "MEETA",
-                    stockPriceData = StockPriceData(
-                        trend = -0.02f,
-                        price = 15300f,
-                        trendChangeRate = 0.002f,
-                        priceChangeRate = 0.01f
-                    )
-                ),
-                StockData(
                     name = "쵸코",
                     stockPriceData = StockPriceData(
                         trend = 0.005f,
@@ -325,7 +316,7 @@ val marketData =
                     name = "불독코인",
                     stockPriceData = StockPriceData(
                         trend = -0.05f,
-                        price = 0.2f,
+                        price = 30f,
                         trendChangeRate = 0.003f,
                         priceChangeRate = 0.07f
                     )
@@ -351,8 +342,8 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.2f,
                         price = 100f,
-                        trendChangeRate = 0.03f,
-                        priceChangeRate = 0.3f
+                        trendChangeRate = 0.0075f,
+                        priceChangeRate = 0.075f
                     )
                 ),
                 StockData(
@@ -360,17 +351,8 @@ val marketData =
                     stockPriceData = StockPriceData(
                         trend = -0.3f,
                         price = 200f,
-                        trendChangeRate = 0.05f,
-                        priceChangeRate = 0.05f
-                    )
-                ),
-                StockData(
-                    name = "신자본 ETF",
-                    stockPriceData = StockPriceData(
-                        trend = -0.25f,
-                        price = 1100f,
-                        trendChangeRate = 0.005f,
-                        priceChangeRate = 0.5f
+                        trendChangeRate = 0.02f,
+                        priceChangeRate = 0.02f
                     )
                 )
             )
@@ -392,11 +374,8 @@ data class StockData(
 ) {
     val history = mutableStateListOf<Float>()
 
-    var enabled = true
-
     fun update() {
-        if (enabled) history.add(stockPriceData.apply { update() }.price)
-        else history.add(stockPriceData.price)
+        history.add(stockPriceData.apply { update() }.price)
     }
 }
 
@@ -408,7 +387,7 @@ data class StockPriceData(
     var priceChangeRate: Float
 ) {
     fun update() {
-        trend += (Random.nextFloat() * 2f - 0.97f) * trendChangeRate - trend * 0.01f
-        price *= 1f + (trend + Random.nextFloat() * 2f - 0.97f) * priceChangeRate
+        trend += (Random.nextFloat() * 2f - 0.985f) * trendChangeRate - trend * 0.01f
+        price *= 1f + (trend + Random.nextFloat() * 2f - 0.985f) * priceChangeRate
     }
 }

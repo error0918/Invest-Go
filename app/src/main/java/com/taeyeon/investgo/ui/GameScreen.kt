@@ -19,7 +19,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -33,9 +32,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.taeyeon.investgo.R
+import com.taeyeon.investgo.data.Settings
 import com.taeyeon.investgo.model.GameSubScreen
 import com.taeyeon.investgo.model.GameViewModel
 import com.taeyeon.investgo.model.MainViewModel
@@ -49,14 +50,14 @@ fun GameScreen(
 ) {
     var size by remember { mutableStateOf(IntSize.Zero) }
 
-    LaunchedEffect(mainViewModel.readyForGameViewModel.selected) {
+    LaunchedEffect(mainViewModel.welcomeViewModel.userName, mainViewModel.readyForGameViewModel.selected) {
         mainViewModel.gameViewModel.endTimer()
         mainViewModel.gameViewModel = GameViewModel(
             name = mainViewModel.welcomeViewModel.userName.trim(),
-            time = mainViewModel.readyForGameViewModel.timeList[mainViewModel.readyForGameViewModel.selected].first,
-            onEnd = {  }
+            time = mainViewModel.readyForGameViewModel.timeList[mainViewModel.readyForGameViewModel.selected].first
         )
     }
+
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -70,7 +71,7 @@ fun GameScreen(
                 .blur(
                     animateDpAsState(
                         targetValue =
-                        if (mainViewModel.gameViewModel.isShowingMenu) 10.dp
+                        if (mainViewModel.gameViewModel.isShowingMenu || mainViewModel.gameViewModel.isShowingEnding) 10.dp
                         else 0.dp
                     ).value
                 )
@@ -148,7 +149,22 @@ fun GameScreen(
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     fontSize = LocalDensity.current.run { 32.dp.toSp() },
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = if (mainViewModel.gameViewModel.gameData.getScore().toInt() > Settings.DEFAULT_MONEY) Color.Red
+                    else if (mainViewModel.gameViewModel.gameData.getScore().toInt() < Settings.DEFAULT_MONEY) Color.Blue
+                    else MaterialTheme.colorScheme.onBackground
+                )
+
+                Text(
+                    text = "(${mainViewModel.gameViewModel.gameData.getScore() / Settings.DEFAULT_MONEY * 100}%)",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Light,
+                    fontSize = LocalDensity.current.run { 16.dp.toSp() },
+                    color = if (mainViewModel.gameViewModel.gameData.getScore().toInt() > Settings.DEFAULT_MONEY) Color.Red
+                    else if (mainViewModel.gameViewModel.gameData.getScore().toInt() < Settings.DEFAULT_MONEY) Color.Blue
+                    else MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier
+                        .align(Alignment.Bottom)
+                        .padding(start = 4.dp)
                 )
 
             }
@@ -429,88 +445,278 @@ fun GameScreen(
                             Column(
                                 modifier = Modifier.fillMaxSize()
                             ) {
-                                var isActionShowing by rememberSaveable { mutableStateOf(false) }
 
                                 Surface(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .weight(1f),
-                                    color = LocalContentColor.current.copy(alpha = 0.2f),
+                                    color = LocalContentColor.current.copy(alpha = 0.6f),
+                                    contentColor = MaterialTheme.colorScheme.onBackground,
                                     shape = RoundedCornerShape(16.dp),
                                     border = BorderStroke(
                                         width = 2.dp,
                                         color = LocalContentColor.current
                                     )
                                 ) {
-                                    //
+                                    CompositionLocalProvider(
+                                        LocalContentColor provides if (isSystemInDarkTheme()) Color.DarkGray else Color.LightGray
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .padding(16.dp)
+                                        ) {
+                                            val dotDivider: @Composable (width: Dp, alpha: Float) -> Unit =
+                                                { width, alpha ->
+                                                    val contentColor = LocalContentColor.current
+                                                    Canvas(
+                                                        modifier = Modifier
+                                                            .padding(vertical = 8.dp)
+                                                            .fillMaxWidth()
+                                                            .height(width)
+                                                    ) {
+                                                        drawLine(
+                                                            color = contentColor,
+                                                            start = Offset(x = 0f, y = 0f),
+                                                            end = Offset(
+                                                                x = this.size.width,
+                                                                y = 0f
+                                                            ),
+                                                            strokeWidth = width.toPx(),
+                                                            pathEffect = PathEffect.dashPathEffect(
+                                                                floatArrayOf(10f, 10f)
+                                                            ),
+                                                            alpha = alpha
+                                                        )
+                                                    }
+                                                }
+
+                                            val informationFontStyle =
+                                                MaterialTheme.typography.labelMedium.copy(
+                                                    fontSize = LocalDensity.current.run { 12.dp.toSp() },
+                                                    fontWeight = FontWeight.Medium,
+                                                    fontFamily = gmarketSans,
+                                                    textAlign = TextAlign.Center
+                                                )
+
+
+                                            Text(
+                                                text = "보유 자산",
+                                                fontSize = LocalDensity.current.run { 40.dp.toSp() },
+                                                fontWeight = FontWeight.Bold,
+                                                fontFamily = gmarketSans,
+                                                textAlign = TextAlign.Start,
+                                                modifier = Modifier.padding(8.dp)
+                                            )
+
+                                            Divider(
+                                                thickness = 1.dp,
+                                                modifier = Modifier
+                                                    .padding(vertical = 8.dp)
+                                                    .fillMaxWidth()
+                                            )
+
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween
+                                            ) {
+                                                Text(
+                                                    text = "원",
+                                                    fontSize = LocalDensity.current.run { 24.dp.toSp() },
+                                                    fontWeight = FontWeight.Medium,
+                                                    fontFamily = gmarketSans,
+                                                    textAlign = TextAlign.Start
+                                                )
+                                                Spacer(modifier = Modifier.weight(1f))
+                                                Text(
+                                                    text = mainViewModel.gameViewModel.gameData.won.toString(),
+                                                    fontSize = LocalDensity.current.run { 24.dp.toSp() },
+                                                    fontWeight = FontWeight.Light,
+                                                    fontFamily = gmarketSans,
+                                                    textAlign = TextAlign.Start
+                                                )
+                                            }
+                                            dotDivider(1.dp, 0.75f)
+
+                                            var isPropertyEmpty by rememberSaveable { mutableStateOf(false) }
+                                            LaunchedEffect(mainViewModel.gameViewModel.gameData.propertyData) {
+                                                isPropertyEmpty = true
+                                                for (tradeCow in mainViewModel.gameViewModel.gameData.propertyData) {
+                                                    for (stockData in tradeCow) {
+                                                        if (stockData.first != 0) isPropertyEmpty = false
+                                                    }
+                                                }
+                                            }
+
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .weight(1f)
+                                                    .verticalScroll(state = rememberScrollState())
+                                            ) {
+                                                if (isPropertyEmpty) {
+                                                    Text(
+                                                        text = "다른 유형의 자산이 없습니다 :(",
+                                                        fontSize = LocalDensity.current.run { 24.dp.toSp() },
+                                                        fontWeight = FontWeight.Medium,
+                                                        fontFamily = gmarketSans,
+                                                        modifier = Modifier.align(Alignment.Center)
+                                                    )
+                                                } else {
+                                                    Column(
+                                                        modifier = Modifier.fillMaxWidth()
+                                                    ) {
+                                                        mainViewModel.gameViewModel.gameData.propertyData.forEachIndexed { tradeCowIndex, tradeCow ->
+                                                            var isTradeCowEmpty by rememberSaveable { mutableStateOf(true) }
+
+                                                            LaunchedEffect(mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].stockDataList) {
+                                                                isTradeCowEmpty = true
+                                                            }
+
+                                                            if (!isTradeCowEmpty) {
+                                                                Text(
+                                                                    text = mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].name,
+                                                                    fontSize = LocalDensity.current.run { 24.dp.toSp() },
+                                                                    fontWeight = FontWeight.Medium,
+                                                                    fontFamily = gmarketSans,
+                                                                    textAlign = TextAlign.Start
+                                                                )
+                                                                dotDivider(0.5f.dp, 0.5f)
+                                                            }
+                                                            tradeCow.forEachIndexed { stockIndex, stock ->
+                                                                if (stock.first != 0) {
+                                                                    val stockData = mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].stockDataList[stockIndex]
+
+                                                                    LaunchedEffect(stock.second) {
+                                                                        if (stock.second > 0) isTradeCowEmpty = false
+                                                                    }
+
+                                                                    Row(
+                                                                        modifier = Modifier.fillMaxWidth(),
+                                                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                                                        verticalAlignment = Alignment.CenterVertically
+                                                                    ) {
+                                                                        Text(
+                                                                            text = stockData.name,
+                                                                            style = informationFontStyle,
+                                                                            modifier = Modifier.weight(1f)
+                                                                        )
+                                                                        Text(
+                                                                            text = (stockData.stockPriceData.price / stock.second * 100).toString(),
+                                                                            style = informationFontStyle,
+                                                                            modifier = Modifier.weight(1f)
+                                                                        )
+                                                                        Text(
+                                                                            text = stock.second.toString(),
+                                                                            style = informationFontStyle,
+                                                                            modifier = Modifier.weight(1f)
+                                                                        )
+                                                                        Text(
+                                                                            text = stockData.stockPriceData.price.toString(),
+                                                                            style = informationFontStyle,
+                                                                            modifier = Modifier.weight(1f)
+                                                                        )
+                                                                        Text(
+                                                                            text = stock.first.toString(),
+                                                                            style = informationFontStyle,
+                                                                            modifier = Modifier.weight(1f)
+                                                                        )
+                                                                        Text(
+                                                                            text = (stock.second * stockData.stockPriceData.price).toString(),
+                                                                            style = informationFontStyle,
+                                                                            modifier = Modifier.weight(1f)
+                                                                        )
+                                                                    }
+                                                                    dotDivider(0.5f.dp, 0.5f)
+                                                                }
+                                                            }
+                                                            if (!isTradeCowEmpty) {
+                                                                dotDivider(1.dp, 0.75f)
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            Divider(
+                                                thickness = 1.dp,
+                                                modifier = Modifier
+                                                    .padding(vertical = 8.dp)
+                                                    .fillMaxWidth()
+                                            )
+
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(32.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.SpaceBetween
+                                                ) {
+                                                    Text(
+                                                        text = "종목 이름",
+                                                        style = informationFontStyle,
+                                                        modifier = Modifier.weight(1f)
+                                                    )
+                                                    Text(
+                                                        text = "변화 비율",
+                                                        style = informationFontStyle,
+                                                        modifier = Modifier.weight(1f)
+                                                    )
+                                                    Text(
+                                                        text = "구매 가격",
+                                                        style = informationFontStyle,
+                                                        modifier = Modifier.weight(1f)
+                                                    )
+                                                    Text(
+                                                        text = "현재 가격",
+                                                        style = informationFontStyle,
+                                                        modifier = Modifier.weight(1f)
+                                                    )
+                                                    Text(
+                                                        text = "보유 개수",
+                                                        style = informationFontStyle,
+                                                        modifier = Modifier.weight(1f)
+                                                    )
+                                                    Text(
+                                                        text = "보유량",
+                                                        style = informationFontStyle,
+                                                        modifier = Modifier.weight(1f)
+                                                    )
+                                                }
+                                            }
+
+                                        }
+                                    }
                                 }
 
                                 Spacer(modifier = Modifier.height(32.dp))
 
                                 Button(
-                                    onClick = { isActionShowing = !isActionShowing },
+                                    onClick = {
+                                        for (tradeCowIndex in mainViewModel.gameViewModel.gameData.propertyData.indices) {
+                                            for (stockDataIndex in mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex].indices) {
+                                                mainViewModel.gameViewModel.gameData.won += mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].stockDataList[stockDataIndex].stockPriceData.price * mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].first
+                                                mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex] = 0 to 0f
+                                            }
+                                        }
+                                    },
                                     shape = MaterialTheme.shapes.medium,
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = MaterialTheme.colorScheme.primary,
                                         contentColor = MaterialTheme.colorScheme.onPrimary,
                                     ),
+                                    enabled = !mainViewModel.gameViewModel.isStoped,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .alpha(0.6f)
                                 ) {
-                                    Icon(
-                                        imageVector = if (isActionShowing) Icons.Rounded.KeyboardArrowDown else Icons.Rounded.KeyboardArrowUp,
-                                        contentDescription = "집 가고 싶다", // TODO
-                                        modifier = Modifier.size(32.dp)
-                                    )
                                     Text(
-                                        text = if (isActionShowing) "액션 숨기기" else "액션 보이기",
-                                        fontSize = with(LocalDensity.current) { 24.dp.toSp() },
+                                        text = "모두 판매하기",
+                                        fontSize = with(LocalDensity.current) { 36.dp.toSp() },
                                         fontWeight = FontWeight.Bold
                                     )
-                                    Icon(
-                                        imageVector = if (isActionShowing) Icons.Rounded.KeyboardArrowDown else Icons.Rounded.KeyboardArrowUp,
-                                        contentDescription = "집 가고 싶다", // TODO
-                                        modifier = Modifier.size(32.dp)
-                                    )
-                                }
-
-                                Spacer(
-                                    modifier = Modifier
-                                        .height(
-                                            animateDpAsState(
-                                                targetValue = if (isActionShowing) 16.dp else 0.dp
-                                            ).value
-                                        )
-                                )
-
-                                AnimatedVisibility(visible = isActionShowing) {
-                                    Column(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                                    ) {
-                                        listOf(
-                                            "돈 벌러가기" to { /*TODO*/ },
-                                            "모두 판매하기" to {}
-                                        ).forEach { pair ->
-                                            Button(
-                                                onClick = pair.second,
-                                                shape = MaterialTheme.shapes.medium,
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = MaterialTheme.colorScheme.primary,
-                                                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                                                ),
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                            ) {
-                                                Text(
-                                                    text = pair.first,
-                                                    fontSize = with(LocalDensity.current) { 36.dp.toSp() },
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            }
-                                        }
-                                    }
                                 }
 
                             }
@@ -545,7 +751,10 @@ fun GameScreen(
                                             )
                                         }
                                     },
-                                    averagePurchasePrice = mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].second
+                                    averagePurchasePrice = mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].second.let {
+                                        if (it == 0f || mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].first == 0) null
+                                        else it
+                                    }
                                 )
                                 
                                 Row(
@@ -559,9 +768,9 @@ fun GameScreen(
                                     val won = mainViewModel.gameViewModel.gameData.won
 
                                     val isBuyingAble = mainViewModel.gameViewModel.gameData.won >= mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].stockDataList[stockDataIndex].stockPriceData.price
-                                    var isBuyingEnabled by rememberSaveable { mutableStateOf(isBuyingAble) }
+                                    var isBuyingEnabled by rememberSaveable { mutableStateOf(false) }
                                     val isSellingAble = mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].first > 0
-                                    var isSellingEnabled by rememberSaveable { mutableStateOf(isSellingAble) }
+                                    var isSellingEnabled by rememberSaveable { mutableStateOf(false) }
 
                                     var wonValue by rememberSaveable { mutableStateOf(0) }
                                     var stockValue by rememberSaveable { mutableStateOf(0) }
@@ -677,7 +886,7 @@ fun GameScreen(
                                                 containerColor = MaterialTheme.colorScheme.primary,
                                                 contentColor = MaterialTheme.colorScheme.onPrimary,
                                             ),
-                                            enabled = isBuyingAble && isBuyingEnabled,
+                                            enabled = isBuyingAble && isBuyingEnabled && !mainViewModel.gameViewModel.isStoped,
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                         ) {
@@ -702,7 +911,7 @@ fun GameScreen(
                                                 mainViewModel.gameViewModel.gameData.won += price * stockValue
                                                 mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex] =
                                                     mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].first - stockValue to
-                                                            mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].second
+                                                            if (mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].first - stockValue == 0) 0f else mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].second
 
                                                 isBuyingEnabled = mainViewModel.gameViewModel.gameData.won >= mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].stockDataList[stockDataIndex].stockPriceData.price
                                                 isSellingEnabled = mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].first > 0
@@ -715,7 +924,7 @@ fun GameScreen(
                                                 containerColor = MaterialTheme.colorScheme.primary,
                                                 contentColor = MaterialTheme.colorScheme.onPrimary,
                                             ),
-                                            enabled = isSellingAble && isSellingEnabled,
+                                            enabled = isSellingAble && isSellingEnabled && !mainViewModel.gameViewModel.isStoped,
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                         ) {
@@ -865,11 +1074,12 @@ fun GameScreen(
                 }
         ) {
 
-            if (mainViewModel.gameViewModel.isShowingMenu) {
+            LaunchedEffect(mainViewModel.gameViewModel.isShowingMenu) {
+                if (mainViewModel.gameViewModel.isShowingMenu) mainViewModel.gameViewModel.stopTimer()
+                else mainViewModel.gameViewModel.resumeTimer()
+            }
 
-                LaunchedEffect(mainViewModel.gameViewModel.isShowingMenu) {
-                    mainViewModel.gameViewModel.stopTimer()
-                }
+            if (mainViewModel.gameViewModel.isShowingMenu) {
 
                 Column(
                     modifier = Modifier
@@ -902,9 +1112,112 @@ fun GameScreen(
                             mainViewModel.gameViewModel.isShowingMenu = false
                             mainViewModel.gameViewModel.resumeTimer()
                         },
-                        Triple(Icons.Rounded.Redo, "게임 다시 시작하기") { // TODO
+                        Triple(Icons.Rounded.Redo, "게임 다시 시작하기") {
+                            mainViewModel.gameViewModel.endTimer()
+                            mainViewModel.gameViewModel = GameViewModel(
+                                name = mainViewModel.welcomeViewModel.userName.trim(),
+                                time = mainViewModel.readyForGameViewModel.timeList[mainViewModel.readyForGameViewModel.selected].first
+                            )
                         },
-                        Triple(Icons.Rounded.Close, "게임 그만하기") {}
+                        Triple(Icons.Rounded.Close, "게임 그만하기") {
+                            mainViewModel.gameViewModel.endTimer()
+                        }
+                    ).forEach {
+                        Button(
+                            onClick = it.third,
+                            shape = MaterialTheme.shapes.medium,
+                            border = BorderStroke(
+                                width = 4.dp,
+                                color = LocalContentColor.current
+                            ),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
+                                    .compositeOver(MaterialTheme.colorScheme.primary),
+                                contentColor = LocalContentColor.current,
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                var iconSize by remember { mutableStateOf(IntSize.Zero) }
+                                Icon(
+                                    imageVector = it.first,
+                                    contentDescription = it.second,
+                                    modifier = Modifier
+                                        .width(LocalDensity.current.run { iconSize.height.toDp() })
+                                        .fillMaxHeight()
+                                        .onSizeChanged { intSize -> iconSize = intSize }
+                                )
+                                Text(
+                                    text = it.second,
+                                    fontSize = with(LocalDensity.current) { 24.dp.toSp() },
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+
+                } // TODO
+
+                Text(
+                    text = "2022 동산제 - 인공지능컴퓨터동아리 부스 (개발자: 20616 정태연)",
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(32.dp)
+                ) // TODO
+
+            }
+
+
+            if (mainViewModel.gameViewModel.isShowingEnding) {
+
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .width(LocalDensity.current.run { size.width.toDp() * 0.4f })
+                        .height(LocalDensity.current.run { size.height.toDp() * 0.6f }),
+                    verticalArrangement = Arrangement.spacedBy(32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.app_name),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontSize = with(LocalDensity.current) { 80.dp.toSp() },
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "일시 중지",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontSize = with(LocalDensity.current) { 40.dp.toSp() },
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    listOf(
+                        Triple(Icons.Rounded.PlayArrow, "게임 계속하기") {
+                            mainViewModel.gameViewModel.isShowingMenu = false
+                            mainViewModel.gameViewModel.resumeTimer()
+                        },
+                        Triple(Icons.Rounded.Redo, "게임 다시 시작하기") {
+                            mainViewModel.gameViewModel.endTimer()
+                            mainViewModel.gameViewModel = GameViewModel(
+                                name = mainViewModel.welcomeViewModel.userName.trim(),
+                                time = mainViewModel.readyForGameViewModel.timeList[mainViewModel.readyForGameViewModel.selected].first
+                            )
+                        },
+                        Triple(Icons.Rounded.Close, "게임 그만하기") {
+                            mainViewModel.gameViewModel.endTimer()
+                        }
                     ).forEach {
                         Button(
                             onClick = it.third,
