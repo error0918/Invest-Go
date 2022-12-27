@@ -1,4 +1,6 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
+    ExperimentalTextApi::class
+)
 @file:Suppress("OPT_IN_IS_NOT_ENABLED")
 
 package com.taeyeon.investgo.ui
@@ -21,15 +23,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -40,8 +40,10 @@ import com.taeyeon.investgo.data.Settings
 import com.taeyeon.investgo.model.GameSubScreen
 import com.taeyeon.investgo.model.GameViewModel
 import com.taeyeon.investgo.model.MainViewModel
+import com.taeyeon.investgo.model.Screen
 import com.taeyeon.investgo.theme.gmarketSans
 import com.taeyeon.investgo.util.formatPrice
+import java.util.*
 
 
 @Composable
@@ -50,12 +52,16 @@ fun GameScreen(
 ) {
     var size by remember { mutableStateOf(IntSize.Zero) }
 
-    LaunchedEffect(mainViewModel.welcomeViewModel.userName, mainViewModel.readyForGameViewModel.selected) {
+    LaunchedEffect(mainViewModel.readyForGameViewModel.gameStartCalendar) {
         mainViewModel.gameViewModel.endTimer()
         mainViewModel.gameViewModel = GameViewModel(
             name = mainViewModel.welcomeViewModel.userName.trim(),
             time = mainViewModel.readyForGameViewModel.timeList[mainViewModel.readyForGameViewModel.selected].first
         )
+    }
+
+    LaunchedEffect(mainViewModel.gameViewModel.isStoped) {
+        if (mainViewModel.gameViewModel.isStoped) mainViewModel.gameViewModel.isShowingEnding = true
     }
 
 
@@ -90,8 +96,13 @@ fun GameScreen(
 
                 IconButton(
                     onClick = {
-                        mainViewModel.gameViewModel.isShowingMenu =
-                            !mainViewModel.gameViewModel.isShowingMenu
+                        if (mainViewModel.gameViewModel.isStoped) {
+                            mainViewModel.gameViewModel.isShowingEnding =
+                                !mainViewModel.gameViewModel.isShowingEnding
+                        } else {
+                            mainViewModel.gameViewModel.isShowingMenu =
+                                !mainViewModel.gameViewModel.isShowingMenu
+                        }
                     },
                     modifier = Modifier
                         .border(
@@ -521,7 +532,7 @@ fun GameScreen(
                                                 horizontalArrangement = Arrangement.SpaceBetween
                                             ) {
                                                 Text(
-                                                    text = "원",
+                                                    text = "햔금 (원)",
                                                     fontSize = LocalDensity.current.run { 24.dp.toSp() },
                                                     fontWeight = FontWeight.Medium,
                                                     fontFamily = gmarketSans,
@@ -529,7 +540,7 @@ fun GameScreen(
                                                 )
                                                 Spacer(modifier = Modifier.weight(1f))
                                                 Text(
-                                                    text = mainViewModel.gameViewModel.gameData.won.toString(),
+                                                    text = "${mainViewModel.gameViewModel.gameData.won}원",
                                                     fontSize = LocalDensity.current.run { 24.dp.toSp() },
                                                     fontWeight = FontWeight.Light,
                                                     fontFamily = gmarketSans,
@@ -1050,17 +1061,17 @@ fun GameScreen(
         Box(
             modifier = Modifier
                 .width(
-                    if (mainViewModel.gameViewModel.isShowingMenu) LocalDensity.current.run { size.width.toDp() }
+                    if (mainViewModel.gameViewModel.isShowingMenu || mainViewModel.gameViewModel.isShowingEnding) LocalDensity.current.run { size.width.toDp() }
                     else 0.dp
                 )
                 .height(
-                    if (mainViewModel.gameViewModel.isShowingMenu) LocalDensity.current.run { size.height.toDp() }
+                    if (mainViewModel.gameViewModel.isShowingMenu || mainViewModel.gameViewModel.isShowingEnding) LocalDensity.current.run { size.height.toDp() }
                     else 0.dp
                 )
                 .background(
                     color = animateColorAsState(
                         targetValue =
-                        if (mainViewModel.gameViewModel.isShowingMenu) MaterialTheme.colorScheme.surface.copy(
+                        if (mainViewModel.gameViewModel.isShowingMenu || mainViewModel.gameViewModel.isShowingEnding) MaterialTheme.colorScheme.surface.copy(
                             alpha = 0.4f
                         )
                         else Color.Transparent,
@@ -1070,6 +1081,7 @@ fun GameScreen(
                 .pointerInput(Unit) {
                     detectTapGestures {
                         mainViewModel.gameViewModel.isShowingMenu = false
+                        mainViewModel.gameViewModel.isShowingEnding = false
                     }
                 }
         ) {
@@ -1113,13 +1125,10 @@ fun GameScreen(
                             mainViewModel.gameViewModel.resumeTimer()
                         },
                         Triple(Icons.Rounded.Redo, "게임 다시 시작하기") {
-                            mainViewModel.gameViewModel.endTimer()
-                            mainViewModel.gameViewModel = GameViewModel(
-                                name = mainViewModel.welcomeViewModel.userName.trim(),
-                                time = mainViewModel.readyForGameViewModel.timeList[mainViewModel.readyForGameViewModel.selected].first
-                            )
+                            mainViewModel.readyForGameViewModel.gameStartCalendar = Calendar.getInstance()
                         },
                         Triple(Icons.Rounded.Close, "게임 그만하기") {
+                            mainViewModel.gameViewModel.isShowingMenu = false
                             mainViewModel.gameViewModel.endTimer()
                         }
                     ).forEach {
@@ -1162,7 +1171,7 @@ fun GameScreen(
                         }
                     }
 
-                } // TODO
+                }
 
                 Text(
                     text = "2022 동산제 - 인공지능컴퓨터동아리 부스 (개발자: 20616 정태연)",
@@ -1170,18 +1179,22 @@ fun GameScreen(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(32.dp)
-                ) // TODO
+                )
 
             }
 
 
             if (mainViewModel.gameViewModel.isShowingEnding) {
 
+                LaunchedEffect(mainViewModel.gameViewModel.isShowingEnding) {
+                    // TODO: EFFECT
+                }
+
                 Column(
                     modifier = Modifier
                         .align(Alignment.Center)
                         .width(LocalDensity.current.run { size.width.toDp() * 0.4f })
-                        .height(LocalDensity.current.run { size.height.toDp() * 0.6f }),
+                        .height(LocalDensity.current.run { size.height.toDp() * 0.5f }),
                     verticalArrangement = Arrangement.spacedBy(32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -1190,33 +1203,39 @@ fun GameScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = stringResource(id = R.string.app_name),
-                            style = MaterialTheme.typography.titleLarge,
+                            text = if (mainViewModel.gameViewModel.gameData.won > Settings.DEFAULT_MONEY) "축하합니다!" else "게임 종료!",
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                brush = Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.tertiary))
+                            ),
                             fontSize = with(LocalDensity.current) { 80.dp.toSp() },
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "일시 중지",
+                            text = "${mainViewModel.gameViewModel.gameData.getScore().toInt()}원 - 옆전 ${
+                                mainViewModel.gameViewModel.gameData.getScore().let {
+                                    if (it <= 1000000) 1
+                                    else if (it <= 1500000) 2
+                                    else if (it <= 3000000) 3
+                                    else if (it <= 10000000) 4
+                                    else 5
+                                }
+                            }개 획득!",
                             style = MaterialTheme.typography.titleLarge,
                             fontSize = with(LocalDensity.current) { 40.dp.toSp() },
                             fontWeight = FontWeight.Bold
                         )
                     }
 
+                    val context = LocalContext.current
                     listOf(
-                        Triple(Icons.Rounded.PlayArrow, "게임 계속하기") {
-                            mainViewModel.gameViewModel.isShowingMenu = false
-                            mainViewModel.gameViewModel.resumeTimer()
-                        },
-                        Triple(Icons.Rounded.Redo, "게임 다시 시작하기") {
+                        Triple(Icons.Rounded.Redo, "기록 구경하기") {
                             mainViewModel.gameViewModel.endTimer()
-                            mainViewModel.gameViewModel = GameViewModel(
-                                name = mainViewModel.welcomeViewModel.userName.trim(),
-                                time = mainViewModel.readyForGameViewModel.timeList[mainViewModel.readyForGameViewModel.selected].first
-                            )
+                            mainViewModel.gameViewModel.isShowingEnding = false
                         },
-                        Triple(Icons.Rounded.Close, "게임 그만하기") {
-                            mainViewModel.gameViewModel.endTimer()
+                        Triple(Icons.Rounded.Close, "나가기") {
+                            mainViewModel.navHostController.navigate(route = Screen.Welcome.name)
+                            mainViewModel.welcomeViewModel.userName = getRandomName()
+                            mainViewModel.welcomeViewModel.userNameErrorMessage = checkUserNameError(context, mainViewModel.welcomeViewModel.userName)
                         }
                     ).forEach {
                         Button(
@@ -1258,15 +1277,15 @@ fun GameScreen(
                         }
                     }
 
-                } // TODO
+                }
 
                 Text(
-                    text = "2022 동산제 - 인공지능컴퓨터동아리 부스 (개발자: 20616 정태연)",
+                    text = "2022 동산제 - 인공지능컴퓨터동아리 부스 (개발자: 20616 정태연",
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(32.dp)
-                ) // TODO
+                )
 
             }
 

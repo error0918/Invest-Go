@@ -30,6 +30,7 @@ import com.taeyeon.investgo.data.Settings
 import com.taeyeon.investgo.model.MainViewModel
 import com.taeyeon.investgo.model.Screen
 import com.taeyeon.investgo.util.spinningGradientBackground
+import java.util.*
 
 @Composable
 fun ReadyForGameScreen(
@@ -182,7 +183,10 @@ fun ReadyForGameScreen(
         }
 
         OutlinedButton(
-            onClick = { mainViewModel.navHostController.navigate(route = Screen.Game.name) },
+            onClick = {
+                mainViewModel.navHostController.navigate(route = Screen.Game.name)
+                mainViewModel.readyForGameViewModel.gameStartCalendar = Calendar.getInstance()
+            },
             shape = CircleShape,
             border = BorderStroke(
                 width = 4.dp,

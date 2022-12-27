@@ -17,7 +17,7 @@ data class GameData(
     var won: Float = Settings.DEFAULT_MONEY
 ) {
     fun getScore(): Float {
-        var score = won.toFloat()
+        var score = won
         for (outerIndex in propertyData.indices) {
             for (innerIndex in propertyData[outerIndex].indices) {
                 score += marketData[outerIndex].stockDataList[innerIndex].stockPriceData.price * propertyData[outerIndex][innerIndex].first
