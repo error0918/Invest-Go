@@ -58,7 +58,7 @@ class GameViewModel(
                         remainingSeconds--
                         remainingVisibleTime = "${getDigitNumber(remainingSeconds / 60, 2)}:${getDigitNumber(remainingSeconds % 60, 2)}"
                         if (remainingSeconds <= 0) {
-                            stopTimer()
+                            endTimer()
                         }
                     }
                 }
@@ -77,7 +77,6 @@ class GameViewModel(
 
     fun endTimer() {
         isTimerWorking = false
-        isShowingEnding = true
         isStoped = true
     }
 }
