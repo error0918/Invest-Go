@@ -42,6 +42,7 @@ import com.taeyeon.investgo.model.MainViewModel
 import com.taeyeon.investgo.theme.gmarketSans
 import com.taeyeon.investgo.util.formatPrice
 
+
 @Composable
 fun GameScreen(
     mainViewModel: MainViewModel = MainViewModel(LocalContext.current)
@@ -271,26 +272,35 @@ fun GameScreen(
                                                                         Alignment.CenterStart
                                                                     )
                                                                 )
-                                                                Text(
-                                                                    text = "${stockData.stockPriceData.price}원",
-                                                                    fontFamily = gmarketSans,
-                                                                    fontSize = LocalDensity.current.run { 20.dp.toSp() },
-                                                                    fontWeight = FontWeight.Medium,
-                                                                    color =
-                                                                        if (stockData.stockPriceData.trend > 0) Color.Red
-                                                                        else if (stockData.stockPriceData.trend < 0) Color.Blue
-                                                                        else LocalContentColor.current,
-                                                                    modifier = Modifier.align(
-                                                                        Alignment.TopEnd
-                                                                    )
-                                                                )
                                                                 Row(
-                                                                    modifier = Modifier.align(
-                                                                        Alignment.BottomEnd
-                                                                    ),
-                                                                    horizontalArrangement = Arrangement.spacedBy(
-                                                                        4.dp
-                                                                    ),
+                                                                    modifier = Modifier.align(Alignment.TopEnd),
+                                                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                                    verticalAlignment = Alignment.Top
+                                                                ) {
+                                                                    if (mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].first != 0) {
+                                                                        Text(
+                                                                            text = "${mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].first}개 소유",
+                                                                            fontFamily = gmarketSans,
+                                                                            fontSize = LocalDensity.current.run { 10.dp.toSp() },
+                                                                            fontWeight = FontWeight.Light,
+                                                                            color = if (stockData.stockPriceData.price > mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].second) Color.Red
+                                                                            else if (stockData.stockPriceData.price < mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].second) Color.Blue
+                                                                            else LocalContentColor.current
+                                                                        )
+                                                                    }
+                                                                    Text(
+                                                                        text = "${stockData.stockPriceData.price}원",
+                                                                        fontFamily = gmarketSans,
+                                                                        fontSize = LocalDensity.current.run { 20.dp.toSp() },
+                                                                        fontWeight = FontWeight.Medium,
+                                                                        color = if (stockData.stockPriceData.trend > 0) Color.Red
+                                                                        else if (stockData.stockPriceData.trend < 0) Color.Blue
+                                                                        else LocalContentColor.current
+                                                                    )
+                                                                }
+                                                                Row(
+                                                                    modifier = Modifier.align(Alignment.BottomEnd),
+                                                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                                                                     verticalAlignment = Alignment.CenterVertically
                                                                 ) {
                                                                     Text(
@@ -310,7 +320,7 @@ fun GameScreen(
                                                                         fontWeight = FontWeight.Light
                                                                     )
                                                                     Text(
-                                                                        text = "추세 변동률: ${stockData.stockPriceData.trendChangeRate * 100f}%",
+                                                                        text = "추세 변동률: ${stockData.stockPriceData.trendChangeRate * 100}%",
                                                                         fontFamily = gmarketSans,
                                                                         fontSize = LocalDensity.current.run { 12.dp.toSp() },
                                                                         fontWeight = FontWeight.Light
@@ -534,7 +544,8 @@ fun GameScreen(
                                                 tint = tint
                                             )
                                         }
-                                    }
+                                    },
+                                    averagePurchasePrice = mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].second
                                 )
                                 
                                 Row(
@@ -549,7 +560,7 @@ fun GameScreen(
 
                                     val isBuyingAble = mainViewModel.gameViewModel.gameData.won >= mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].stockDataList[stockDataIndex].stockPriceData.price
                                     var isBuyingEnabled by rememberSaveable { mutableStateOf(isBuyingAble) }
-                                    val isSellingAble = mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex] > 0
+                                    val isSellingAble = mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].first > 0
                                     var isSellingEnabled by rememberSaveable { mutableStateOf(isSellingAble) }
 
                                     var wonValue by rememberSaveable { mutableStateOf(0) }
@@ -569,13 +580,23 @@ fun GameScreen(
                                     ) {
                                         val steps = (won / price).toInt()
 
-                                        Text(
-                                            text = "원",
-                                            fontFamily = gmarketSans,
-                                            fontSize = LocalDensity.current.run { 16.dp.toSp() },
-                                            fontWeight = FontWeight.Medium,
-                                            modifier = Modifier.align(Alignment.Start)
-                                        )
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text(
+                                                text = "원",
+                                                fontFamily = gmarketSans,
+                                                fontSize = LocalDensity.current.run { 16.dp.toSp() },
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                            Spacer(Modifier.weight(1f))
+                                            Text(
+                                                text = "$won",
+                                                fontFamily = gmarketSans,
+                                                fontSize = LocalDensity.current.run { 16.dp.toSp() },
+                                                fontWeight = FontWeight.Light
+                                            )
+                                        }
                                         Text(
                                             text = "${price * wonValue}",
                                             fontFamily = gmarketSans,
@@ -638,16 +659,19 @@ fun GameScreen(
                                         verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         Button(
-                                            onClick = { /*TODO*/
+                                            onClick = {
                                                 mainViewModel.gameViewModel.gameData.won -= price * wonValue
-                                                mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex] += wonValue
+                                                mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex] =
+                                                    mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].first + wonValue to
+                                                            (mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].second * mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].first + price * wonValue) /
+                                                            (mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].first + wonValue)
 
                                                 isBuyingEnabled = mainViewModel.gameViewModel.gameData.won >= mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].stockDataList[stockDataIndex].stockPriceData.price
-                                                isSellingEnabled = mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex] > 0
+                                                isSellingEnabled = mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].first > 0
 
                                                 wonValue = 0
                                                 stockValue = 0
-                                                      },
+                                            },
                                             shape = MaterialTheme.shapes.medium,
                                             colors = ButtonDefaults.buttonColors(
                                                 containerColor = MaterialTheme.colorScheme.primary,
@@ -674,7 +698,18 @@ fun GameScreen(
                                             )
                                         }
                                         Button(
-                                            onClick = { /*TODO*/ },
+                                            onClick = {
+                                                mainViewModel.gameViewModel.gameData.won += price * stockValue
+                                                mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex] =
+                                                    mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].first - stockValue to
+                                                            mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].second
+
+                                                isBuyingEnabled = mainViewModel.gameViewModel.gameData.won >= mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].stockDataList[stockDataIndex].stockPriceData.price
+                                                isSellingEnabled = mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].first > 0
+
+                                                wonValue = 0
+                                                stockValue = 0
+                                            },
                                             shape = MaterialTheme.shapes.medium,
                                             colors = ButtonDefaults.buttonColors(
                                                 containerColor = MaterialTheme.colorScheme.primary,
@@ -713,15 +748,25 @@ fun GameScreen(
                                         verticalArrangement = Arrangement.spacedBy(8.dp),
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
-                                        val stockNumber = mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex]
+                                        val stockNumber = mainViewModel.gameViewModel.gameData.propertyData[tradeCowIndex][stockDataIndex].first
 
-                                        Text(
-                                            text = mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].stockDataList[stockDataIndex].name,
-                                            fontFamily = gmarketSans,
-                                            fontSize = LocalDensity.current.run { 16.dp.toSp() },
-                                            fontWeight = FontWeight.Medium,
-                                            modifier = Modifier.align(Alignment.End)
-                                        )
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text(
+                                                text = "$stockNumber",
+                                                fontFamily = gmarketSans,
+                                                fontSize = LocalDensity.current.run { 16.dp.toSp() },
+                                                fontWeight = FontWeight.Light
+                                            )
+                                            Spacer(Modifier.weight(1f))
+                                            Text(
+                                                text = mainViewModel.gameViewModel.gameData.marketData[tradeCowIndex].stockDataList[stockDataIndex].name,
+                                                fontFamily = gmarketSans,
+                                                fontSize = LocalDensity.current.run { 16.dp.toSp() },
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                        }
                                         Text(
                                             text = stockValue.toString(),
                                             fontFamily = gmarketSans,

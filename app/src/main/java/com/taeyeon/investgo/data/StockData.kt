@@ -408,7 +408,7 @@ data class StockPriceData(
     var priceChangeRate: Float
 ) {
     fun update() {
-        trend += (Random.nextFloat() * 2f - 0.99f) * trendChangeRate - trend * 0.01f
-        price *= 1f + (trend + Random.nextFloat() * 2f - 0.99f) * priceChangeRate
+        trend += (Random.nextFloat() * 2f - 0.97f) * trendChangeRate - trend * 0.01f
+        price *= 1f + (trend + Random.nextFloat() * 2f - 0.97f) * priceChangeRate
     }
 }

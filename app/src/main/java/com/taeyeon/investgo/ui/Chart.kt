@@ -33,7 +33,8 @@ fun Chart(
     modifier: Modifier = Modifier,
     icon: ImageVector,
     stockData: StockData,
-    toolbarLeftItem: (@Composable () -> Unit)?
+    toolbarLeftItem: (@Composable () -> Unit)? = null,
+    averagePurchasePrice: Float? = null
 ) {
     var priceRange = stockData.history[0] .. stockData.history[0]
     stockData.history.forEach {
