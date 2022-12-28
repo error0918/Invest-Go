@@ -32,7 +32,7 @@ class GameViewModel(
 
     var remainingVisibleTime by mutableStateOf("${getDigitNumber(remainingSeconds / 60, 2)}:${getDigitNumber(remainingSeconds % 60, 2)}")
 
-    var gameData by mutableStateOf(GameData())
+    var gameData by mutableStateOf(GameData().copy())
 
     var isShowingMenu by mutableStateOf(false)
     var isStoped by mutableStateOf(false)
@@ -41,6 +41,7 @@ class GameViewModel(
 
 
     init {
+        gameData = GameData().copy()
         CoroutineScope(Dispatchers.IO).launch {
             var count = 0
             while (isTimerWorking) {
