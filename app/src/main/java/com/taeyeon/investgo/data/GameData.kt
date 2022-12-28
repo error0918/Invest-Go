@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 
 data class GameData(
-    val marketData: List<TradeCowData> = ArrayList(com.taeyeon.investgo.data.marketData),
+    val marketData: List<TradeCowData> = getCopiedMarketData(),
     val propertyData: SnapshotStateList<SnapshotStateList<Pair<Int, Float>>> = marketData.let {
         val outerSnapshotStateList = mutableStateListOf<SnapshotStateList<Pair<Int, Float>>>()
         it.forEach { tradeCowData ->

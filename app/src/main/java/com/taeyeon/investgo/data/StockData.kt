@@ -4,6 +4,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.graphics.vector.ImageVector
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 
@@ -359,6 +362,28 @@ val marketData =
         )
 
     )
+
+fun getCopiedMarketData(): List<TradeCowData> {
+    return mutableListOf<TradeCowData>().let { mutableList ->
+        marketData.forEach { tradeCowData ->
+            mutableList.add(
+                TradeCowData(
+                    name = tradeCowData.name,
+                    icon = tradeCowData.icon,
+                    stockDataList = mutableListOf<StockData>().let {
+                        tradeCowData.stockDataList.forEach { stockData ->
+                            it.add(
+                                stockData.copy()
+                            )
+                        }
+                        it.toList()
+                    }
+                )
+            )
+        }
+        mutableList.toList()
+    }
+}
 
 
 data class TradeCowData(

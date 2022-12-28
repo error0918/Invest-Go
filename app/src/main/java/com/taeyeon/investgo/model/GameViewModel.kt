@@ -41,7 +41,6 @@ class GameViewModel(
 
 
     init {
-        gameData = GameData().copy()
         CoroutineScope(Dispatchers.IO).launch {
             var count = 0
             while (isTimerWorking) {
